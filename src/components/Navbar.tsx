@@ -36,6 +36,11 @@ export default function Navbar() {
         >
           <ul className="navbar-nav gap-lg-3">
             <li className="nav-item">
+              <NavLink className="nav-link" to="/collections">
+                Collections
+              </NavLink>
+            </li>
+            <li className="nav-item">
               <NavLink className="nav-link" to="/products">
                 Products
               </NavLink>
