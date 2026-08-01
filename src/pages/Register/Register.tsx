@@ -1,13 +1,14 @@
 import { useForm } from "react-hook-form";
 import { registerUser } from "../../api/auth";
 import type { RegisterData } from "../../types/auth";
+import { useNavigate } from "react-router-dom";
 
 export default function Register() {
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
     watch,
-    reset,
     setError,
     formState: { errors, isSubmitting, touchedFields },
   } = useForm<RegisterData>({
@@ -21,8 +22,7 @@ export default function Register() {
       await registerUser(data);
 
       alert("Account created successfully!");
-
-      reset();
+      navigate("/login");
     } catch (error: any) {
       const data = error.response?.data;
 
