@@ -6,7 +6,6 @@ import { Products } from "./pages/Products/Products";
 import { ProductDetail } from "./pages/ProductDetail/ProductDetail";
 import Register from "./pages/Register/Register";
 import Login from "./pages/Login/Login";
-import { Children } from "react";
 
 export const router = createBrowserRouter([
   {
