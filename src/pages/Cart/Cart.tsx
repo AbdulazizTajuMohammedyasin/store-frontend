@@ -3,6 +3,8 @@ import {
   useUpdateCartItem,
   useDeleteCartItem,
 } from "../../hooks/useCart";
+import { useNavigate } from "react-router-dom";
+import { useCreateOrder } from "../../hooks/useOrders";
 
 export default function Cart() {
   const { data, isLoading, error } = useCart();
@@ -10,6 +12,10 @@ export default function Cart() {
   const updateMutation = useUpdateCartItem();
 
   const deleteMutation = useDeleteCartItem();
+
+  const navigate = useNavigate();
+
+  const createOrderMutation = useCreateOrder();
 
   if (isLoading) return <p>Loading...</p>;
 
@@ -81,7 +87,18 @@ export default function Cart() {
 
       <h3>Total: £{cart.total_price}</h3>
 
-      <button className="btn btn-success mt-3">Checkout</button>
+      <button
+        className="btn btn-success mt-3"
+        onClick={() =>
+          createOrderMutation.mutate(undefined, {
+            onSuccess: () => {
+              navigate("/orders");
+            },
+          })
+        }
+      >
+        Place Order
+      </button>
     </div>
   );
 }
