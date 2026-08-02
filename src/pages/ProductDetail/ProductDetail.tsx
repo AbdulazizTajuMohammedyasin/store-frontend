@@ -1,10 +1,13 @@
 import { useParams } from "react-router-dom";
 import { useProduct } from "../../hooks/useProducts";
+import { useAddToCart } from "../../hooks/useCart";
 
 export const ProductDetail = () => {
   const { id } = useParams();
 
   const { data, isLoading, error } = useProduct(id!);
+
+  const addToCartMutation = useAddToCart();
 
   if (isLoading) return <p>Loading...</p>;
 
@@ -32,7 +35,18 @@ export const ProductDetail = () => {
 
           <p>{product.description}</p>
 
-          <button className="btn btn-success">Add To Cart</button>
+          <button
+            className="btn btn-success"
+            onClick={() =>
+              addToCartMutation.mutate({
+                product_id: product.id,
+                quantity: 1,
+              })
+            }
+            disabled={addToCartMutation.isPending}
+          >
+            {addToCartMutation.isPending ? "Adding..." : "Add To Cart"}
+          </button>
         </div>
       </div>
     </div>

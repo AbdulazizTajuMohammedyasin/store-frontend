@@ -8,6 +8,7 @@ import Register from "./pages/Register/Register";
 import Login from "./pages/Login/Login";
 import Collections from "./pages/Collections/Collections";
 import CollectionDetail from "./pages/CollectionDetail/CollectionDetail";
+import Cart from "./pages/Cart/Cart";
 
 export const router = createBrowserRouter([
   {
@@ -40,6 +41,10 @@ export const router = createBrowserRouter([
       {
         path: "/collections/:id",
         element: <CollectionDetail />,
+      },
+      {
+        path: "/cart",
+        element: <Cart />,
       },
     ],
   },

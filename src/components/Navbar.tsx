@@ -49,6 +49,11 @@ export default function Navbar() {
             {user ? (
               <>
                 <li className="nav-item">
+                  <NavLink className="nav-link" to="/cart">
+                    Cart
+                  </NavLink>
+                </li>
+                <li className="nav-item">
                   <span className="nav-link">Hello, {user.username}</span>
                 </li>
 
