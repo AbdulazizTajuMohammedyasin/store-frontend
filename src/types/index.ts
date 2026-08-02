@@ -20,3 +20,9 @@ export interface Collection {
     image: string | null;
   } | null;
 }
+
+export interface ProductParams {
+    collection?: string;
+    price_min?: number;
+    price_max?: number;
+}

@@ -1,8 +1,12 @@
 import client from "./client";
-import type { Product } from "../types";
+import type { Product, ProductParams } from "../types";
 
-export const getProducts = () => {
-  return client.get<Product[]>("/products/");
+
+
+export const getProducts = (params?: ProductParams) => {
+    return client.get<Product[]>("/products/", {
+        params
+    });
 };
 
 export const getProduct = (id: number | string) =>
