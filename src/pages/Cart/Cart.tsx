@@ -91,8 +91,8 @@ export default function Cart() {
         className="btn btn-success mt-3"
         onClick={() =>
           createOrderMutation.mutate(undefined, {
-            onSuccess: () => {
-              navigate("/orders");
+            onSuccess: (response) => {
+              navigate(`/orders/${response.data.id}`);
             },
           })
         }

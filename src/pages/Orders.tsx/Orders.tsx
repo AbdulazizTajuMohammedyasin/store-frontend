@@ -15,9 +15,11 @@ export default function Orders() {
       <h1>My Orders</h1>
 
       <div className="mt-4">
-        {orders.map((order) => (
-          <OrderCard key={order.id} order={order} />
-        ))}
+        {orders.length === 0 ? (
+          <p>No orders yet.</p>
+        ) : (
+          orders.map((order) => <OrderCard key={order.id} order={order} />)
+        )}
       </div>
     </div>
   );

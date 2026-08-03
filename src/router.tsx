@@ -10,6 +10,7 @@ import Collections from "./pages/Collections/Collections";
 import CollectionDetail from "./pages/CollectionDetail/CollectionDetail";
 import Cart from "./pages/Cart/Cart";
 import Orders from "./pages/Orders.tsx/Orders";
+import OrderDetail from "./pages/OrderDetail/OrderDetail";
 
 export const router = createBrowserRouter([
   {
@@ -50,6 +51,10 @@ export const router = createBrowserRouter([
       {
         path: "/orders",
         element: <Orders />,
+      },
+      {
+        path: "/orders/:id",
+        element: <OrderDetail />,
       },
     ],
   },
