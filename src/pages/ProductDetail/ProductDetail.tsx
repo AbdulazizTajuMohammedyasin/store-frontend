@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useProduct } from "../../hooks/useProducts";
 import { useAddToCart } from "../../hooks/useCart";
+import SimilarProducts from "../../components/SimilarProducts";
 
 export const ProductDetail = () => {
   const { id } = useParams();
@@ -16,39 +17,44 @@ export const ProductDetail = () => {
   const product = data!.data;
 
   return (
-    <div className="container mt-5">
-      <div className="row">
-        <div className="col-md-6">
-          <img
-            src={product.images[0]?.image || "/default.jpg"}
-            alt={product.title}
-            className="img-fluid rounded"
-          />
-        </div>
+    <>
+      <div className="container mt-5">
+        <div className="row">
+          <div className="col-md-6">
+            <img
+              src={product.images[0]?.image || "/default.jpg"}
+              alt={product.title}
+              className="img-fluid rounded"
+            />
+          </div>
 
-        <div className="col-md-6">
-          <h2>{product.title}</h2>
+          <div className="col-md-6">
+            <h2>{product.title}</h2>
 
-          <p className="text-muted">{product.collection}</p>
+            <p className="text-muted">{product.collection}</p>
 
-          <h3>£{product.price}</h3>
+            <h3>£{product.price}</h3>
 
-          <p>{product.description}</p>
+            <p>{product.description}</p>
 
-          <button
-            className="btn btn-success"
-            onClick={() =>
-              addToCartMutation.mutate({
-                product_id: product.id,
-                quantity: 1,
-              })
-            }
-            disabled={addToCartMutation.isPending}
-          >
-            {addToCartMutation.isPending ? "Adding..." : "Add To Cart"}
-          </button>
+            <button
+              className="btn btn-success"
+              onClick={() =>
+                addToCartMutation.mutate({
+                  product_id: product.id,
+                  quantity: 1,
+                })
+              }
+              disabled={addToCartMutation.isPending}
+            >
+              {addToCartMutation.isPending ? "Adding..." : "Add To Cart"}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+      <div className="container">
+        <SimilarProducts productId={product.id} />
+      </div>
+    </>
   );
 };
