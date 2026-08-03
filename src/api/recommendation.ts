@@ -8,3 +8,7 @@ export const getSimilarProducts = (
     `/products/${productId}/similar/`
   );
 };
+
+export const getUserRecommendations = () => {
+  return client.get("/recommendations/");
+};

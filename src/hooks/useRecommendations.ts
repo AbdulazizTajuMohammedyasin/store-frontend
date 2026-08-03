@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { getSimilarProducts } from "../api/recommendation";
+import { getSimilarProducts, getUserRecommendations } from "../api/recommendation";
 
 export const useSimilarProducts = (
   productId: number | string
@@ -13,4 +13,15 @@ export const useSimilarProducts = (
 
     enabled: !!productId,
   });
+};
+
+export const useUserRecommendations =
+  () => {
+    return useQuery({
+      queryKey: ["user-recommendations", ],
+
+      queryFn:
+        getUserRecommendations,
+    });
+
 };
