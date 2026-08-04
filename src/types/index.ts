@@ -22,7 +22,9 @@ export interface Collection {
 }
 
 export interface ProductParams {
+    search?: string;
     collection?: string;
     price_min?: number;
     price_max?: number;
+    ordering?: string;
 }
