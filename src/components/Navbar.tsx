@@ -56,6 +56,11 @@ export default function Navbar() {
                 <li className="nav-item">
                   <span className="nav-link">Hello, {user.username}</span>
                 </li>
+                <li className="nav-item">
+                  <NavLink className="nav-link" to="/address">
+                    Address
+                  </NavLink>
+                </li>
 
                 <li className="nav-item">
                   <button
