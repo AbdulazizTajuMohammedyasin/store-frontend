@@ -1,7 +1,11 @@
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useProduct } from "../../hooks/useProducts";
 import { useAddToCart } from "../../hooks/useCart";
 import SimilarProducts from "../../components/SimilarProducts";
+import ReviewList from "../../components/ReviewList";
+
+import "./ProductDetail.css";
 
 export const ProductDetail = () => {
   const { id } = useParams();
@@ -9,6 +13,8 @@ export const ProductDetail = () => {
   const { data, isLoading, error } = useProduct(id!);
 
   const addToCartMutation = useAddToCart();
+
+  const [activeTab, setActiveTab] = useState<"reviews" | "similar">("reviews");
 
   if (isLoading) return <p>Loading...</p>;
 
@@ -52,8 +58,39 @@ export const ProductDetail = () => {
           </div>
         </div>
       </div>
-      <div className="container">
-        <SimilarProducts productId={product.id} />
+
+      <div className="container mt-5">
+        <div className="tab-buttons">
+          <button
+            className={activeTab === "reviews" ? "active" : ""}
+            onClick={() => setActiveTab("reviews")}
+          >
+            Reviews
+          </button>
+
+          <button
+            className={activeTab === "similar" ? "active" : ""}
+            onClick={() => setActiveTab("similar")}
+          >
+            Similar Products
+          </button>
+        </div>
+
+        <div className="slider-container">
+          <div
+            className={`slider ${
+              activeTab === "similar" ? "show-similar" : ""
+            }`}
+          >
+            <div className="page">
+              <ReviewList productId={product.id} />
+            </div>
+
+            <div className="page">
+              <SimilarProducts productId={product.id} />
+            </div>
+          </div>
+        </div>
       </div>
     </>
   );

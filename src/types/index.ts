@@ -28,3 +28,11 @@ export interface ProductParams {
     price_max?: number;
     ordering?: string;
 }
+
+export interface Review {
+  id: number;
+  rating: number;
+  comment: string;
+  created_at: string;
+  reviewed_by: string;
+}
