@@ -89,15 +89,9 @@ export default function Cart() {
 
       <button
         className="btn btn-success mt-3"
-        onClick={() =>
-          createOrderMutation.mutate(undefined, {
-            onSuccess: (response) => {
-              navigate(`/orders/${response.data.id}`);
-            },
-          })
-        }
+        onClick={() => navigate("/payment")}
       >
-        Place Order
+        Proceed to Payment
       </button>
     </div>
   );
