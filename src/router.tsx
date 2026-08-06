@@ -12,6 +12,7 @@ import Cart from "./pages/Cart/Cart";
 import Orders from "./pages/Orders.tsx/Orders";
 import OrderDetail from "./pages/OrderDetail/OrderDetail";
 import AddressPage from "./pages/AddressPage/AddressPage";
+import ProfilePage from "./pages/ProfilePage/ProfilePage";
 
 export const router = createBrowserRouter([
   {
@@ -60,6 +61,10 @@ export const router = createBrowserRouter([
       {
         path: "/address",
         element: <AddressPage />,
+      },
+      {
+        path: "/profile",
+        element: <ProfilePage />,
       },
     ],
   },
