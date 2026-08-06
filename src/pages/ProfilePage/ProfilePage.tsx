@@ -1,8 +1,24 @@
 import { useEffect, useState } from "react";
+
 import { useCustomer } from "../../hooks/useCustomer";
+import {
+  useAddress,
+  useCreateAddress,
+  useUpdateAddress,
+} from "../../hooks/useAddress";
+
+import { useAuth } from "../../context/AuthContext";
 
 export default function ProfilePage() {
+  const { user } = useAuth();
+
   const { data, updateCustomer, isUpdating } = useCustomer();
+
+  const { data: address, isLoading: addressLoading } = useAddress();
+
+  const createAddress = useCreateAddress();
+
+  const updateAddress = useUpdateAddress();
 
   const customer = data?.data;
 
@@ -16,17 +32,36 @@ export default function ProfilePage() {
     profile_image: null as File | null,
   });
 
+  const [addressData, setAddressData] = useState({
+    street: "",
+    city: "",
+  });
+
   useEffect(() => {
     if (customer) {
       setFormData({
         first_name: customer.first_name,
+
         last_name: customer.last_name,
+
         phone: customer.phone || "",
+
         birth_date: customer.birth_date || "",
+
         profile_image: null,
       });
     }
   }, [customer]);
+
+  useEffect(() => {
+    if (address) {
+      setAddressData({
+        street: address.street,
+
+        city: address.city,
+      });
+    }
+  }, [address]);
 
   if (!customer) {
     return (
@@ -41,6 +76,17 @@ export default function ProfilePage() {
 
     setFormData((previous) => ({
       ...previous,
+
+      [name]: value,
+    }));
+  };
+
+  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    setAddressData((previous) => ({
+      ...previous,
+
       [name]: value,
     }));
   };
@@ -49,6 +95,7 @@ export default function ProfilePage() {
     if (e.target.files) {
       setFormData((previous) => ({
         ...previous,
+
         profile_image: e.target.files![0],
       }));
     }
@@ -69,7 +116,21 @@ export default function ProfilePage() {
       form.append("profile_image", formData.profile_image);
     }
 
+    // update customer profile
+
     updateCustomer(form);
+
+    // update or create address
+
+    if (address) {
+      updateAddress.mutate({
+        id: address.id,
+
+        data: addressData,
+      });
+    } else {
+      createAddress.mutate(addressData);
+    }
 
     setEditing(false);
   };
@@ -89,18 +150,20 @@ export default function ProfilePage() {
           ) : (
             <div
               className="
-                  rounded-circle 
-                  bg-secondary 
-                  text-white 
-                  d-flex 
-                  align-items-center 
-                  justify-content-center 
-                  mx-auto 
+                  rounded-circle
+                  bg-secondary
+                  text-white
+                  d-flex
+                  align-items-center
+                  justify-content-center
+                  mx-auto
                   mb-3
                 "
               style={{
                 width: "120px",
+
                 height: "120px",
+
                 fontSize: "40px",
               }}
             >
@@ -130,10 +193,24 @@ export default function ProfilePage() {
             </h3>
           )}
 
-          <p className="text-muted">{customer.email}</p>
+          <p className="text-muted">{user?.email}</p>
         </div>
 
         <hr />
+
+        <div className="row">
+          <div className="col-md-6 mb-3">
+            <strong>Username</strong>
+
+            <p>{user?.username}</p>
+          </div>
+
+          <div className="col-md-6 mb-3">
+            <strong>Email</strong>
+
+            <p>{user?.email}</p>
+          </div>
+        </div>
 
         {editing && (
           <div className="mb-3">
@@ -187,13 +264,61 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className="d-flex gap-2">
+        <hr />
+
+        <h5>Address</h5>
+
+        {addressLoading ? (
+          <p>Loading address...</p>
+        ) : editing ? (
+          <>
+            <div className="mb-3">
+              <label className="form-label">Street</label>
+
+              <input
+                className="form-control"
+                name="street"
+                value={addressData.street}
+                onChange={handleAddressChange}
+              />
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">City</label>
+
+              <input
+                className="form-control"
+                name="city"
+                value={addressData.city}
+                onChange={handleAddressChange}
+              />
+            </div>
+          </>
+        ) : address ? (
+          <>
+            <p>
+              <strong>Street:</strong> {address.street}
+            </p>
+
+            <p>
+              <strong>City:</strong> {address.city}
+            </p>
+          </>
+        ) : (
+          <p>No address added</p>
+        )}
+
+        <div className="d-flex gap-2 mt-3">
           {editing ? (
             <>
               <button
                 className="btn btn-success"
                 onClick={handleSubmit}
-                disabled={isUpdating}
+                disabled={
+                  isUpdating ||
+                  updateAddress.isPending ||
+                  createAddress.isPending
+                }
               >
                 {isUpdating ? "Saving..." : "Save Changes"}
               </button>
