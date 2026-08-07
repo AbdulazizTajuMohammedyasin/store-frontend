@@ -1,8 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import "./payment.css";
 import { useCart } from "../../hooks/useCart";
+import { useAddress } from "../../hooks/useAddress";
 import { useCreateOrder } from "../../hooks/useOrders";
 import { useNavigate } from "react-router-dom";
+import AddressForm from "../../components/AddressForm";
+import type { Address } from "../../types/address";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -54,6 +57,12 @@ const COUNTRIES = [
   "Australia",
 ];
 
+const EMPTY_ADDRESS: Address = {
+  id: 0,
+  street: "",
+  city: "",
+};
+
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
@@ -70,12 +79,14 @@ export default function PaymentPage({
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
   const [country, setCountry] = useState(COUNTRIES[0]);
+  const [address, setAddress] = useState<Address>(EMPTY_ADDRESS);
   const [status, setStatus] = useState<"idle" | "processing" | "success">(
     "idle",
   );
   const [orderError, setOrderError] = useState<string | null>(null);
 
   const { data, isLoading, error } = useCart();
+  const { data: savedAddress } = useAddress();
   const createOrderMutation = useCreateOrder();
   const navigate = useNavigate();
 
@@ -83,6 +94,22 @@ export default function PaymentPage({
 
   const digits = cardNumber.replace(/\s/g, "");
   const brand = useMemo(() => detectBrand(digits), [digits]);
+
+  // Prefill street/city from the customer's saved address, once, without
+  // overwriting anything the user has already typed.
+  useEffect(() => {
+    if (!savedAddress) return;
+
+    setAddress((prev) =>
+      prev.street === "" && prev.city === ""
+        ? {
+            id: savedAddress.id,
+            street: savedAddress.street,
+            city: savedAddress.city,
+          }
+        : prev,
+    );
+  }, [savedAddress]);
 
   // Guard against loading/error/empty-cart states before touching cart fields
   if (isLoading) {
@@ -262,6 +289,8 @@ export default function PaymentPage({
                     onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
+
+                <AddressForm value={address} onChange={setAddress} />
 
                 <div className="mb-3">
                   <label className="pmck-label" htmlFor="cardNumber">
