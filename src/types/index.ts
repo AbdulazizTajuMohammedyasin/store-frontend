@@ -27,6 +27,7 @@ export interface ProductParams {
     price_min?: number;
     price_max?: number;
     ordering?: string;
+    page?: number;
 }
 
 export interface Review {
@@ -35,4 +36,11 @@ export interface Review {
   comment: string;
   created_at: string;
   reviewed_by: string;
+}
+
+export interface PaginatedResponse<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
 }

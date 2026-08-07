@@ -1,10 +1,10 @@
 import client from "./client";
-import type { Product, ProductParams } from "../types";
+import type { Product, ProductParams, PaginatedResponse } from "../types";
 
 
 
 export const getProducts = (params?: ProductParams) => {
-    return client.get<Product[]>("/products/", {
+    return client.get<PaginatedResponse<Product>>("/products/", {
         params
     });
 };
