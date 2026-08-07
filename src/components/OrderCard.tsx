@@ -1,4 +1,5 @@
 import type { Order } from "../types/order";
+import { Link } from "react-router-dom";
 
 interface Props {
   order: Order;
@@ -6,16 +7,18 @@ interface Props {
 
 export default function OrderCard({ order }: Props) {
   return (
-    <div className="card mb-3">
-      <div className="card-body">
-        <h5>Order #{order.id}</h5>
+    <Link to={`/orders/${order.id}`} className="text-decoration-none text-dark">
+      <div className="card mb-3">
+        <div className="card-body">
+          <h5>Order #{order.id}</h5>
 
-        <p>Status: {order.payment_status}</p>
+          <p>Status: {order.payment_status}</p>
 
-        <p>Date: {new Date(order.placed_at).toLocaleString()}</p>
+          <p>Date: {new Date(order.placed_at).toLocaleString()}</p>
 
-        <p>Items: {order.items.length}</p>
+          <p>Items: {order.items.length}</p>
+        </div>
       </div>
-    </div>
+    </Link>
   );
 }
