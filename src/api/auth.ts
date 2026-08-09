@@ -36,3 +36,16 @@ export const getCurrentUser = ()=>{
     );
 
 };
+
+export const activateUser = (uid: string, token: string) => {
+    return client.post("/auth/users/activation/", {
+        uid,
+        token,
+    });
+};
+
+export const resendActivationEmail = (email: string) => {
+    return client.post("/auth/users/resend_activation/", {
+        email,
+    });
+};

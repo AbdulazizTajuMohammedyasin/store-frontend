@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 import { getCurrentUser, loginUser } from "../../api/auth";
 import { useAuth } from "../../context/AuthContext";
@@ -107,6 +107,12 @@ export default function Login() {
                 >
                   {isSubmitting ? "Logging in..." : "Login"}
                 </button>
+                <p className="text-center mt-3">
+                  Didn't verify your email?{" "}
+                  <Link to="/resend-verification">
+                    Resend verification email
+                  </Link>
+                </p>
               </form>
             </div>
           </div>

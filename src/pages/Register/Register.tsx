@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { registerUser } from "../../api/auth";
 import type { RegisterData } from "../../types/auth";
@@ -9,6 +10,7 @@ export default function Register() {
     register,
     handleSubmit,
     watch,
+    trigger,
     setError,
     formState: { errors, isSubmitting, touchedFields },
   } = useForm<RegisterData>({
@@ -17,27 +19,58 @@ export default function Register() {
 
   const password = watch("password");
 
+  // Re-validate confirm-password whenever password changes,
+  // so a stale "match" doesn't slip through after editing password.
+  useEffect(() => {
+    if (touchedFields.re_password) {
+      trigger("re_password");
+    }
+  }, [password, touchedFields.re_password, trigger]);
+
   async function onSubmit(data: RegisterData) {
     try {
       await registerUser(data);
 
-      alert("Account created successfully!");
+      alert(
+        "Account created successfully! Please check your email to verify your account.",
+      );
       navigate("/login");
     } catch (error: any) {
       const data = error.response?.data;
 
-      if (data.username) {
+      let handled = false;
+
+      if (data?.username) {
         setError("username", {
           type: "server",
           message: data.username[0],
         });
+        handled = true;
       }
 
-      if (data.email) {
+      if (data?.email) {
         setError("email", {
           type: "server",
           message: data.email[0],
         });
+        handled = true;
+      }
+
+      if (data?.password) {
+        setError("password", {
+          type: "server",
+          message: data.password[0],
+        });
+        handled = true;
+      }
+
+      // Fallback for anything not mapped to a specific field
+      // (network errors, 500s, generic detail messages, etc.)
+      if (!handled) {
+        alert(
+          data?.detail ||
+            "Something went wrong while creating your account. Please try again.",
+        );
       }
     }
   }
@@ -57,10 +90,14 @@ export default function Register() {
               <form onSubmit={handleSubmit(onSubmit)}>
                 {/* Email */}
                 <div className="mb-3">
-                  <label className="form-label">Email</label>
+                  <label htmlFor="email" className="form-label">
+                    Email
+                  </label>
 
                   <input
+                    id="email"
                     type="email"
+                    autoComplete="email"
                     placeholder="Enter your email"
                     className={`form-control ${
                       errors.email
@@ -85,10 +122,14 @@ export default function Register() {
 
                 {/* Username */}
                 <div className="mb-3">
-                  <label className="form-label">Username</label>
+                  <label htmlFor="username" className="form-label">
+                    Username
+                  </label>
 
                   <input
+                    id="username"
                     type="text"
+                    autoComplete="username"
                     placeholder="Choose a username"
                     className={`form-control ${
                       errors.username
@@ -113,10 +154,14 @@ export default function Register() {
 
                 {/* Password */}
                 <div className="mb-3">
-                  <label className="form-label">Password</label>
+                  <label htmlFor="password" className="form-label">
+                    Password
+                  </label>
 
                   <input
+                    id="password"
                     type="password"
+                    autoComplete="new-password"
                     placeholder="Enter your password"
                     className={`form-control ${
                       errors.password
@@ -141,10 +186,14 @@ export default function Register() {
 
                 {/* Confirm Password */}
                 <div className="mb-4">
-                  <label className="form-label">Confirm Password</label>
+                  <label htmlFor="re_password" className="form-label">
+                    Confirm Password
+                  </label>
 
                   <input
+                    id="re_password"
                     type="password"
+                    autoComplete="new-password"
                     placeholder="Confirm your password"
                     className={`form-control ${
                       errors.re_password

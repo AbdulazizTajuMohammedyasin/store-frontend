@@ -21,7 +21,9 @@ client.interceptors.request.use((config) => {
     method === "post" &&
     (url === "/auth/users/" ||
       url === "/auth/jwt/create/" ||
-      url === "/auth/jwt/refresh/");
+      url === "/auth/jwt/refresh/" ||
+      url === "/auth/users/activation/" ||
+      url === "/auth/users/resend_activation/");
 
   if (token && !(isPublicGet || isPublicPost)) {
     config.headers.Authorization = `JWT ${token}`;

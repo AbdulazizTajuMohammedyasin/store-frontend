@@ -13,6 +13,8 @@ import Orders from "./pages/Orders.tsx/Orders";
 import OrderDetail from "./pages/OrderDetail/OrderDetail";
 import ProfilePage from "./pages/ProfilePage/ProfilePage";
 import PaymentPage from "./pages/Payment/PaymentPage";
+import ActivateAccount from "./pages/ActivateAccount/ActivateAccount";
+import ResendVerification from "./pages/ResendVerification/ResendVerification";
 
 export const router = createBrowserRouter([
   {
@@ -65,6 +67,14 @@ export const router = createBrowserRouter([
       {
         path: "/payment",
         element: <PaymentPage />,
+      },
+      {
+        path: "/activate/:uid/:token",
+        element: <ActivateAccount />,
+      },
+      {
+        path: "/resend-verification",
+        element: <ResendVerification />,
       },
     ],
   },
