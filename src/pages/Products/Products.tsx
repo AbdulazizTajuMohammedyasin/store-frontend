@@ -2,10 +2,10 @@ import { useState } from "react";
 
 import ProductCard from "../../components/ProductCard";
 import ProductFilterBar from "../../components/ProductFilterBar";
-import Pagination from "../../components/pagination";
+import Pagination from "../../components/Pagination";
 import RecommendedProducts from "../../components/RecommendedProducts";
 
-import useProducts from "../../hooks/useProducts";
+import { useProducts } from "../../hooks/useProducts";
 
 import type { ProductParams } from "../../types";
 const PAGE_SIZE = 12;

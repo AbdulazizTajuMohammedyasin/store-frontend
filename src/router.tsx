@@ -15,6 +15,9 @@ import ProfilePage from "./pages/ProfilePage/ProfilePage";
 import PaymentPage from "./pages/Payment/PaymentPage";
 import ActivateAccount from "./pages/ActivateAccount/ActivateAccount";
 import ResendVerification from "./pages/ResendVerification/ResendVerification";
+import DashboardPage from "./pages/Admin/DashboardPage";
+import AdminLayout from "./components/AdminLayout";
+import AdminProducts from "./pages/Admin/AdminProducts";
 
 export const router = createBrowserRouter([
   {
@@ -75,6 +78,19 @@ export const router = createBrowserRouter([
       {
         path: "/resend-verification",
         element: <ResendVerification />,
+      },
+    ],
+  },
+  {
+    element: <AdminLayout />,
+    children: [
+      {
+        path: "/admin",
+        element: <DashboardPage />,
+      },
+      {
+        path: "/admin/products",
+        element: <AdminProducts />,
       },
     ],
   },

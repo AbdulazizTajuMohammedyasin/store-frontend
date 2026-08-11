@@ -30,10 +30,7 @@ export default function Navbar() {
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        <div
-          className="collapse navbar-collapse justify-content-end"
-          id="navbarNav"
-        >
+        <div className="navbar-collapse justify-content-end" id="navbarNav">
           <ul className="navbar-nav gap-lg-3">
             <li className="nav-item">
               <NavLink className="nav-link" to="/collections">

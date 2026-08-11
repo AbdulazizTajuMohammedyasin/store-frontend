@@ -1,10 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
-import { getProducts, getProduct } from "../api/products";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getProducts, getProduct, createProduct } from "../api/products";
 import type {ProductParams} from "../types";
 
-export default function useProducts(
+export const useProducts = (
   params?: ProductParams
-) {
+) => {
   return useQuery({
     queryKey: ["products", params],
 
@@ -21,4 +21,17 @@ export const useProduct = (id: number | string) => {
         queryKey: ["product", id],
         queryFn: () => getProduct(id),
     });
+};
+
+export const useCreateProduct = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createProduct,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["products"],
+      });
+    },
+  });
 };
