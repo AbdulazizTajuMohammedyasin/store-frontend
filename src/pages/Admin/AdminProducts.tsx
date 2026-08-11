@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useProducts, useCreateProduct } from "@/hooks/useProducts";
+import { useCreateProductImage } from "@/hooks/useProductImages";
 import useCollections from "@/hooks/useCollections";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -44,6 +45,7 @@ const productSchema = z.object({
   inventory: z.coerce.number().min(0, "Inventory cannot be negative."),
   price: z.coerce.number().min(0, "Price cannot be negative."),
   collection: z.coerce.number().min(1, "Collection ID is required."),
+  image: z.instanceof(File).optional(),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -61,6 +63,7 @@ export default function AdminProducts() {
     search: search || undefined,
   });
   const createProductMutation = useCreateProduct();
+  const createProductImageMutation = useCreateProductImage();
 
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -74,8 +77,17 @@ export default function AdminProducts() {
   });
 
   const onSubmit = (values: ProductFormData) => {
-    createProductMutation.mutate(values, {
-      onSuccess: () => {
+    const { image, ...productData } = values;
+    createProductMutation.mutate(productData, {
+      onSuccess: async (response) => {
+        const productId = response.data.id;
+        if (image) {
+          await createProductImageMutation.mutateAsync({
+            productId,
+            image,
+          });
+        }
+
         form.reset();
         setOpen(false);
       },
@@ -243,6 +255,32 @@ export default function AdminProducts() {
                           ))}
                         </SelectContent>
                       </Select>
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="image"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="product-image">
+                        Product Image
+                      </FieldLabel>
+
+                      <Input
+                        id="product-image"
+                        type="file"
+                        accept="image/*"
+                        aria-invalid={fieldState.invalid}
+                        onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          field.onChange(file);
+                        }}
+                      />
+
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
                       )}
