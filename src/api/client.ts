@@ -10,13 +10,6 @@ client.interceptors.request.use((config) => {
   const method = config.method?.toLowerCase();
   const url = config.url ?? "";
 
-  // Public GET endpoints
-  const isPublicGet =
-    method === "get" &&
-    (url.startsWith("/products/") ||
-      url.startsWith("/collections/"));
-
-  // Public POST endpoints
   const isPublicPost =
     method === "post" &&
     (url === "/auth/users/" ||
@@ -25,7 +18,7 @@ client.interceptors.request.use((config) => {
       url === "/auth/users/activation/" ||
       url === "/auth/users/resend_activation/");
 
-  if (token && !(isPublicGet || isPublicPost)) {
+  if (token && !isPublicPost) {
     config.headers.Authorization = `JWT ${token}`;
   }
 

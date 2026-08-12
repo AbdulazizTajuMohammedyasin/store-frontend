@@ -1,6 +1,14 @@
-import { useState } from "react";
-import { useProducts, useCreateProduct } from "@/hooks/useProducts";
-import { useCreateProductImage } from "@/hooks/useProductImages";
+import { useEffect, useState } from "react";
+import {
+  useProducts,
+  useProduct,
+  useCreateProduct,
+  useUpdateProduct,
+} from "@/hooks/useProducts";
+import {
+  useCreateProductImage,
+  useDeleteProductImage,
+} from "@/hooks/useProductImages";
 import useCollections from "@/hooks/useCollections";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -45,15 +53,23 @@ const productSchema = z.object({
   inventory: z.coerce.number().min(0, "Inventory cannot be negative."),
   price: z.coerce.number().min(0, "Price cannot be negative."),
   collection: z.coerce.number().min(1, "Collection ID is required."),
-  image: z.instanceof(File).optional(),
+  images: z.array(z.instanceof(File)).optional(),
 });
 
-type ProductFormData = z.infer<typeof productSchema>;
+// z.coerce fields make the "input" (before validation) type differ from the
+// "output" (after validation) type. Giving useForm both fixes the resolver
+// generic mismatch you were seeing (ts2322 / ts2345).
+type ProductFormInput = z.input<typeof productSchema>;
+type ProductFormOutput = z.output<typeof productSchema>;
 
 export default function AdminProducts() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
+  const [editingProductId, setEditingProductId] = useState<number | undefined>(
+    undefined,
+  );
+  const isEditing = editingProductId !== undefined;
 
   const { data: collectionsData } = useCollections();
   const collections = collectionsData?.data ?? [];
@@ -62,10 +78,20 @@ export default function AdminProducts() {
     page,
     search: search || undefined,
   });
+
+  // Fires only once editingProductId is set (see "enabled" in useProduct).
+  // This hits GET /products/:id, which — for a staff user — returns the
+  // admin serializer with the real `inventory` value and a numeric
+  // `collection` id, unlike the list rows which omit inventory entirely.
+  const { data: editingProductResponse, isFetching: isLoadingEditingProduct } =
+    useProduct(editingProductId);
+
   const createProductMutation = useCreateProduct();
   const createProductImageMutation = useCreateProductImage();
+  const deleteProductImageMutation = useDeleteProductImage();
+  const updateProductMutation = useUpdateProduct();
 
-  const form = useForm<ProductFormData>({
+  const form = useForm<ProductFormInput, unknown, ProductFormOutput>({
     resolver: zodResolver(productSchema),
     defaultValues: {
       title: "",
@@ -73,23 +99,62 @@ export default function AdminProducts() {
       inventory: 0,
       price: 0,
       collection: undefined,
+      images: [],
     },
   });
 
-  const onSubmit = (values: ProductFormData) => {
-    const { image, ...productData } = values;
+  useEffect(() => {
+    const product = editingProductResponse?.data;
+    if (!product) return;
+
+    form.reset({
+      title: product.title,
+      description: product.description,
+      inventory: product.inventory,
+      price: Number(product.price),
+      collection: product.collection,
+      images: [],
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editingProductResponse]);
+
+  const closeDialog = () => {
+    form.reset();
+    setEditingProductId(undefined);
+    setOpen(false);
+  };
+
+  const onSubmit = (values: ProductFormOutput) => {
+    const { images, ...productData } = values;
+
+    const uploadImages = async (productId: number) => {
+      if (!images || images.length === 0) return;
+      // Uploaded sequentially rather than Promise.all so a failure partway
+      // through doesn't fire a burst of parallel requests against the
+      // same product; simpler to reason about for now.
+      for (const image of images) {
+        await createProductImageMutation.mutateAsync({ productId, image });
+      }
+    };
+
+    if (isEditing) {
+      updateProductMutation.mutate(
+        { id: editingProductId, data: productData },
+        {
+          onSuccess: async () => {
+            await uploadImages(editingProductId);
+            closeDialog();
+          },
+        },
+      );
+      return;
+    }
+
     createProductMutation.mutate(productData, {
       onSuccess: async (response) => {
         const productId = response.data.id;
-        if (image) {
-          await createProductImageMutation.mutateAsync({
-            productId,
-            image,
-          });
-        }
-
-        form.reset();
-        setOpen(false);
+        await uploadImages(productId);
+        closeDialog();
       },
     });
   };
@@ -123,21 +188,36 @@ export default function AdminProducts() {
         <Dialog
           open={open}
           onOpenChange={(nextOpen) => {
-            setOpen(nextOpen);
             if (!nextOpen) {
-              form.reset();
+              closeDialog();
+            } else {
+              setOpen(true);
             }
           }}
         >
           <DialogTrigger asChild>
-            <Button>Add Product</Button>
+            <Button onClick={() => setEditingProductId(undefined)}>
+              Add Product
+            </Button>
           </DialogTrigger>
 
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create Product</DialogTitle>
-              <DialogDescription>Add a new product.</DialogDescription>
+              <DialogTitle>
+                {isEditing ? "Edit Product" : "Create Product"}
+              </DialogTitle>
+              <DialogDescription>
+                {isEditing
+                  ? "Update this product's details."
+                  : "Add a new product."}
+              </DialogDescription>
             </DialogHeader>
+
+            {isEditing && isLoadingEditingProduct && (
+              <p className="text-sm text-muted-foreground">
+                Loading product details...
+              </p>
+            )}
 
             <form
               className="space-y-0"
@@ -261,23 +341,75 @@ export default function AdminProducts() {
                     </Field>
                   )}
                 />
+                <Field>
+                  <FieldLabel>Product Images</FieldLabel>
+
+                  {isEditing && (
+                    <div className="flex flex-wrap gap-3">
+                      {(editingProductResponse?.data.images ?? []).length ===
+                        0 &&
+                        !isLoadingEditingProduct && (
+                          <p className="text-xs text-muted-foreground">
+                            No images yet.
+                          </p>
+                        )}
+
+                      {(editingProductResponse?.data.images ?? []).map(
+                        (existingImage) => (
+                          <div
+                            key={existingImage.id}
+                            className="relative h-20 w-20"
+                          >
+                            <img
+                              src={existingImage.image}
+                              alt=""
+                              className="h-20 w-20 rounded-md object-cover"
+                            />
+                            <button
+                              type="button"
+                              aria-label="Delete image"
+                              disabled={deleteProductImageMutation.isPending}
+                              className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-xs text-destructive-foreground disabled:opacity-50"
+                              onClick={() => {
+                                // Deletes immediately rather than waiting
+                                // for "Save Changes" — matches typical
+                                // admin UX where removing an image is its
+                                // own action, not part of the form diff.
+                                deleteProductImageMutation.mutate({
+                                  productId: editingProductId,
+                                  imageId: existingImage.id,
+                                });
+                              }}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  )}
+                </Field>
+
                 <Controller
-                  name="image"
+                  name="images"
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel htmlFor="product-image">
-                        Product Image
+                        {isEditing ? "Add New Images" : "Product Images"}
                       </FieldLabel>
 
                       <Input
                         id="product-image"
                         type="file"
                         accept="image/*"
+                        multiple
                         aria-invalid={fieldState.invalid}
                         onChange={(event) => {
-                          const file = event.target.files?.[0];
-                          field.onChange(file);
+                          const files = event.target.files
+                            ? Array.from(event.target.files)
+                            : [];
+                          field.onChange(files);
                         }}
                       />
 
@@ -294,11 +426,19 @@ export default function AdminProducts() {
               <Button
                 type="submit"
                 form="create-product-form"
-                disabled={createProductMutation.isPending}
+                disabled={
+                  createProductMutation.isPending ||
+                  updateProductMutation.isPending ||
+                  (isEditing && isLoadingEditingProduct)
+                }
               >
-                {createProductMutation.isPending
-                  ? "Creating..."
-                  : "Create Product"}
+                {isEditing
+                  ? updateProductMutation.isPending
+                    ? "Saving..."
+                    : "Save Changes"
+                  : createProductMutation.isPending
+                    ? "Creating..."
+                    : "Create Product"}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -381,7 +521,19 @@ export default function AdminProducts() {
 
                   {/* Actions */}
                   <TableCell className="text-right">
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        // Just open the dialog and set the id — the actual
+                        // GET /products/:id fetch (via useProduct) and the
+                        // form.reset() with the real inventory + numeric
+                        // collection id happen in the useEffect above once
+                        // that request resolves.
+                        setEditingProductId(product.id);
+                        setOpen(true);
+                      }}
+                    >
                       Edit
                     </Button>
                   </TableCell>

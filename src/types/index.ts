@@ -12,6 +12,16 @@ export interface Product {
   images: ProductImage[];
 }
 
+export interface ProductDetail {
+  id: number;
+  title: string;
+  description: string;
+  price: number;
+  inventory: number;
+  collection: number;
+  images: ProductImage[];
+}
+
 export interface Collection {
   id: number;
   title: string;
@@ -43,4 +53,12 @@ export interface PaginatedResponse<T> {
   next: string | null;
   previous: string | null;
   results: T[];
+}
+
+export interface UpdateProductData {
+  title?: string;
+  description?: string;
+  price?: number;
+  inventory?: number;
+  collection?: number;
 }

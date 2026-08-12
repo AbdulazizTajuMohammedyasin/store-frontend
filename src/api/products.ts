@@ -1,5 +1,5 @@
 import client from "./client";
-import type { Product, ProductParams, PaginatedResponse } from "../types";
+import type { Product, ProductParams, PaginatedResponse, UpdateProductData } from "../types";
 
 
 
@@ -20,4 +20,11 @@ export const createProduct = (product: {
   collection: number;
 }) => {
   return client.post("/products/", product);
+};
+
+export const updateProduct = (
+  id: number,
+  data: UpdateProductData
+) => {
+  return client.patch(`/products/${id}/`, data);
 };

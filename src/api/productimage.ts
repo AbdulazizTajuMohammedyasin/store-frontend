@@ -13,3 +13,12 @@ export const createProductImage = (
     formData
   );
 };
+
+export const deleteProductImage = (
+  productId: number | string,
+  imageId: number | string
+) => {
+  return client.delete(
+    `/products/${productId}/images/${imageId}/`
+  );
+};
