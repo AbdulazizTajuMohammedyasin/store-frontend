@@ -28,3 +28,7 @@ export const updateProduct = (
 ) => {
   return client.patch(`/products/${id}/`, data);
 };
+
+export const deleteProduct = (id: number | string) => {
+  return client.delete(`/products/${id}/`);
+};

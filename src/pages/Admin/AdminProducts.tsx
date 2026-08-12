@@ -4,6 +4,7 @@ import {
   useProduct,
   useCreateProduct,
   useUpdateProduct,
+  useDeleteProduct,
 } from "@/hooks/useProducts";
 import {
   useCreateProductImage,
@@ -90,6 +91,7 @@ export default function AdminProducts() {
   const createProductImageMutation = useCreateProductImage();
   const deleteProductImageMutation = useDeleteProductImage();
   const updateProductMutation = useUpdateProduct();
+  const deleteProductMutation = useDeleteProduct();
 
   const form = useForm<ProductFormInput, unknown, ProductFormOutput>({
     resolver: zodResolver(productSchema),
@@ -521,21 +523,48 @@ export default function AdminProducts() {
 
                   {/* Actions */}
                   <TableCell className="text-right">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        // Just open the dialog and set the id — the actual
-                        // GET /products/:id fetch (via useProduct) and the
-                        // form.reset() with the real inventory + numeric
-                        // collection id happen in the useEffect above once
-                        // that request resolves.
-                        setEditingProductId(product.id);
-                        setOpen(true);
-                      }}
-                    >
-                      Edit
-                    </Button>
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setEditingProductId(product.id);
+                          setOpen(true);
+                        }}
+                      >
+                        Edit
+                      </Button>
+
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        disabled={
+                          deleteProductMutation.isPending &&
+                          deleteProductMutation.variables === product.id
+                        }
+                        onClick={() => {
+                          const confirmed = window.confirm(
+                            `Delete "${product.title}"? This can't be undone.`,
+                          );
+                          if (!confirmed) return;
+
+                          deleteProductMutation.mutate(product.id, {
+                            onError: (error) => {
+                              const message =
+                                (
+                                  error as {
+                                    response?: { data?: { error?: string } };
+                                  }
+                                ).response?.data?.error ??
+                                "Failed to delete product.";
+                              window.alert(message);
+                            },
+                          });
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
