@@ -34,7 +34,7 @@ export default function CollectionDetail() {
     );
   }
 
-  const products = data?.data ?? [];
+  const products = data?.data.results ?? [];
 
   return (
     <div className="container mt-4">
