@@ -18,6 +18,7 @@ import ResendVerification from "./pages/ResendVerification/ResendVerification";
 import DashboardPage from "./pages/Admin/DashboardPage";
 import AdminLayout from "./components/AdminLayout";
 import AdminProducts from "./pages/Admin/AdminProducts";
+import AdminCollections from "./pages/Admin/AdminCollections";
 
 export const router = createBrowserRouter([
   {
@@ -91,6 +92,10 @@ export const router = createBrowserRouter([
       {
         path: "/admin/products",
         element: <AdminProducts />,
+      },
+      {
+        path: "/admin/collections",
+        element: <AdminCollections />,
       },
     ],
   },
