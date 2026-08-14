@@ -20,6 +20,7 @@ import AdminLayout from "./components/AdminLayout";
 import AdminProducts from "./pages/Admin/AdminProducts";
 import AdminCollections from "./pages/Admin/AdminCollections";
 import AdminOrders from "./pages/Admin/AdminOrders";
+import AdminCustomers from "./pages/Admin/AdminCustomers";
 
 export const router = createBrowserRouter([
   {
@@ -101,6 +102,10 @@ export const router = createBrowserRouter([
       {
         path: "/admin/orders",
         element: <AdminOrders />,
+      },
+      {
+        path: "/admin/customers",
+        element: <AdminCustomers />,
       },
     ],
   },

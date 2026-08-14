@@ -50,8 +50,8 @@ const data = {
       icon: <ShoppingCartIcon />,
     },
     {
-      title: "Users",
-      url: "/admin/users",
+      title: "Customers",
+      url: "/admin/customers",
       icon: <UsersIcon />,
     },
   ],
