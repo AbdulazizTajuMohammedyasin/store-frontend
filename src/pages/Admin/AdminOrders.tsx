@@ -65,6 +65,41 @@ const getStatusLabel = (status: "P" | "C" | "F") => {
   }
 };
 
+const getOrderTotal = (order: {
+  items: { unit_price: string | number; quantity: number }[];
+}) =>
+  order.items.reduce(
+    (total, item) => total + Number(item.unit_price) * item.quantity,
+    0,
+  );
+
+type SortOption =
+  | "newest"
+  | "oldest"
+  | "pending-first"
+  | "complete-first"
+  | "failed-first";
+
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: "newest", label: "Newest → Oldest" },
+  { value: "oldest", label: "Oldest → Newest" },
+  { value: "pending-first", label: "Pending first" },
+  { value: "complete-first", label: "Complete first" },
+  { value: "failed-first", label: "Failed first" },
+];
+
+// Lower number sorts first when a status-priority sort is selected.
+const STATUS_PRIORITY: Record<
+  SortOption,
+  Partial<Record<"P" | "C" | "F", number>>
+> = {
+  "pending-first": { P: 0, C: 1, F: 1 },
+  "complete-first": { C: 0, P: 1, F: 1 },
+  "failed-first": { F: 0, P: 1, C: 1 },
+  newest: {},
+  oldest: {},
+};
+
 export default function AdminOrders() {
   const { data: ordersResponse, isLoading, isError } = useOrders();
   const { data: customers } = useAllCustomers();
@@ -72,6 +107,8 @@ export default function AdminOrders() {
   const updateOrder = useUpdateOrder();
 
   const [search, setSearch] = useState("");
+
+  const [sortOption, setSortOption] = useState<SortOption>("newest");
 
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
 
@@ -89,22 +126,47 @@ export default function AdminOrders() {
   const filteredOrders = useMemo(() => {
     const query = search.trim().toLowerCase();
 
-    if (!query) {
-      return orders;
-    }
+    const matched = !query
+      ? orders
+      : orders.filter((order) => {
+          const customerLabel = getCustomerLabel(
+            customersById.get(order.customer),
+            order.customer,
+          ).toLowerCase();
 
-    return orders.filter((order) => {
-      const customerLabel = getCustomerLabel(
-        customersById.get(order.customer),
-        order.customer,
-      ).toLowerCase();
+          return (
+            String(order.id).toLowerCase().includes(query) ||
+            customerLabel.includes(query)
+          );
+        });
 
-      return (
-        String(order.id).toLowerCase().includes(query) ||
-        customerLabel.includes(query)
-      );
+    const sorted = [...matched];
+
+    const priorityMap = STATUS_PRIORITY[sortOption];
+    const isStatusSort = Object.keys(priorityMap).length > 0;
+
+    sorted.sort((a, b) => {
+      if (isStatusSort) {
+        const priorityDiff =
+          (priorityMap[a.payment_status] ?? 1) -
+          (priorityMap[b.payment_status] ?? 1);
+
+        if (priorityDiff !== 0) return priorityDiff;
+
+        // Same status group: fall back to newest first.
+        return (
+          new Date(b.placed_at).getTime() - new Date(a.placed_at).getTime()
+        );
+      }
+
+      const diff =
+        new Date(a.placed_at).getTime() - new Date(b.placed_at).getTime();
+
+      return sortOption === "oldest" ? diff : -diff;
     });
-  }, [orders, search, customersById]);
+
+    return sorted;
+  }, [orders, search, customersById, sortOption]);
 
   const selectedOrder = orders.find((order) => order.id === selectedOrderId);
 
@@ -159,19 +221,37 @@ export default function AdminOrders() {
         </p>
       </div>
 
-      {/* ================= SEARCH ================= */}
+      {/* ================= SEARCH & SORT ================= */}
 
       <Card>
         <CardHeader>
           <CardTitle>Search Orders</CardTitle>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="flex flex-col gap-3 sm:flex-row">
           <Input
             placeholder="Search by order ID, customer name, or email..."
             value={search}
             onChange={(event) => setSearch(event.target.value)}
+            className="sm:flex-1"
           />
+
+          <Select
+            value={sortOption}
+            onValueChange={(value) => setSortOption(value as SortOption)}
+          >
+            <SelectTrigger className="sm:w-56">
+              <SelectValue placeholder="Sort by..." />
+            </SelectTrigger>
+
+            <SelectContent>
+              {SORT_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </CardContent>
       </Card>
 
@@ -193,6 +273,8 @@ export default function AdminOrders() {
                 <TableHead>Date</TableHead>
 
                 <TableHead>Items</TableHead>
+
+                <TableHead>Total</TableHead>
 
                 <TableHead>Status</TableHead>
 
@@ -247,6 +329,12 @@ export default function AdminOrders() {
                     )}
                   </TableCell>
 
+                  {/* TOTAL */}
+
+                  <TableCell className="font-medium">
+                    RM {getOrderTotal(order).toFixed(2)}
+                  </TableCell>
+
                   {/* STATUS */}
 
                   <TableCell>
@@ -279,7 +367,7 @@ export default function AdminOrders() {
 
               {filteredOrders.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center">
+                  <TableCell colSpan={7} className="text-center">
                     No orders found.
                   </TableCell>
                 </TableRow>
@@ -299,9 +387,11 @@ export default function AdminOrders() {
           }
         }}
       >
-        <DialogContent className="flex max-h-[85vh] w-[95vw] max-w-4xl flex-col gap-0 overflow-hidden p-0">
-          <DialogHeader className="border-b px-6 py-4">
-            <DialogTitle>Order #{selectedOrder?.id}</DialogTitle>
+        <DialogContent className="flex max-h-[90vh] w-[95vw] max-w-[95vw] flex-col gap-0 overflow-hidden p-0 lg:max-w-6xl xl:max-w-7xl">
+          <DialogHeader className="border-b px-8 py-5">
+            <DialogTitle className="text-xl">
+              Order #{selectedOrder?.id}
+            </DialogTitle>
 
             <DialogDescription>
               View order details and update payment status.
@@ -309,7 +399,7 @@ export default function AdminOrders() {
           </DialogHeader>
 
           {selectedOrder && (
-            <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-6 py-5">
+            <div className="min-h-0 flex-1 space-y-8 overflow-y-auto px-8 py-6">
               {/* ORDER INFORMATION */}
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -320,15 +410,15 @@ export default function AdminOrders() {
                   );
 
                   return (
-                    <div className="rounded-lg border p-4">
+                    <div className="min-w-0 rounded-lg border p-5">
                       <p className="text-sm text-muted-foreground">Customer</p>
 
-                      <p className="mt-1 font-medium">
+                      <p className="mt-1 break-words font-medium">
                         {getCustomerLabel(customer, selectedOrder.customer)}
                       </p>
 
                       {hasName && customer?.email && (
-                        <p className="text-sm text-muted-foreground">
+                        <p className="mt-0.5 break-words text-sm text-muted-foreground">
                           {customer.email}
                         </p>
                       )}
@@ -336,10 +426,10 @@ export default function AdminOrders() {
                   );
                 })()}
 
-                <div className="rounded-lg border p-4">
+                <div className="min-w-0 rounded-lg border p-5">
                   <p className="text-sm text-muted-foreground">Order Date</p>
 
-                  <p className="mt-1 font-medium">
+                  <p className="mt-1 break-words font-medium">
                     {new Date(selectedOrder.placed_at).toLocaleString()}
                   </p>
                 </div>
@@ -392,19 +482,12 @@ export default function AdminOrders() {
 
               {/* ORDER TOTAL */}
 
-              <div className="flex justify-end border-t pt-4">
+              <div className="flex justify-end border-t pt-5">
                 <div className="text-right">
                   <p className="text-sm text-muted-foreground">Total</p>
 
-                  <p className="text-xl font-bold">
-                    RM{" "}
-                    {selectedOrder.items
-                      .reduce(
-                        (total, item) =>
-                          total + Number(item.unit_price) * item.quantity,
-                        0,
-                      )
-                      .toFixed(2)}
+                  <p className="text-2xl font-bold">
+                    RM {getOrderTotal(selectedOrder).toFixed(2)}
                   </p>
                 </div>
               </div>
@@ -436,7 +519,7 @@ export default function AdminOrders() {
             </div>
           )}
 
-          <DialogFooter className="border-t px-6 py-4">
+          <DialogFooter className="border-t px-8 py-5">
             <Button type="button" variant="outline" onClick={closeOrder}>
               Cancel
             </Button>
