@@ -10,3 +10,9 @@ export const updateCustomer = (data: FormData) =>
       "Content-Type": "multipart/form-data",
     },
   });
+
+export const getCustomers = async () => {
+  const response = await client.get<Customer[]>("/customers/");
+ 
+  return response.data;
+};

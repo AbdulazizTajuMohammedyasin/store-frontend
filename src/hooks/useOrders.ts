@@ -8,9 +8,10 @@ import {
   createOrder,
   getOrder,
   getOrders,
+  updateOrder
 } from "../api/orders";
 
-
+import type {UpdateOrderData } from "@/types/order"
 
 export const useOrders = () => {
 
@@ -58,4 +59,28 @@ export const useCreateOrder = () => {
 
   });
 
+};
+
+export const useUpdateOrder = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: number;
+      data: UpdateOrderData;
+    }) => updateOrder(id, data),
+
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["orders"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["order", variables.id],
+      });
+    },
+  });
 };

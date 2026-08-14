@@ -19,6 +19,7 @@ import DashboardPage from "./pages/Admin/DashboardPage";
 import AdminLayout from "./components/AdminLayout";
 import AdminProducts from "./pages/Admin/AdminProducts";
 import AdminCollections from "./pages/Admin/AdminCollections";
+import AdminOrders from "./pages/Admin/AdminOrders";
 
 export const router = createBrowserRouter([
   {
@@ -96,6 +97,10 @@ export const router = createBrowserRouter([
       {
         path: "/admin/collections",
         element: <AdminCollections />,
+      },
+      {
+        path: "/admin/orders",
+        element: <AdminOrders />,
       },
     ],
   },
