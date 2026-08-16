@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import Layout from "./components/Layout";
 
 import Home from "./pages/Home/Home";
@@ -21,6 +21,8 @@ import AdminProducts from "./pages/Admin/AdminProducts";
 import AdminCollections from "./pages/Admin/AdminCollections";
 import AdminOrders from "./pages/Admin/AdminOrders";
 import AdminCustomers from "./pages/Admin/AdminCustomers";
+import AdminLogin from "./pages/Admin/AdminLogin";
+import AdminRoute from "./pages/Admin/Adminroute";
 
 export const router = createBrowserRouter([
   {
@@ -85,28 +87,22 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    element: <AdminLayout />,
+    path: "/admin/login",
+    element: <AdminLogin />,
+  },
+  {
+    element: (
+      <AdminRoute>
+        <AdminLayout />
+      </AdminRoute>
+    ),
     children: [
-      {
-        path: "/admin",
-        element: <DashboardPage />,
-      },
-      {
-        path: "/admin/products",
-        element: <AdminProducts />,
-      },
-      {
-        path: "/admin/collections",
-        element: <AdminCollections />,
-      },
-      {
-        path: "/admin/orders",
-        element: <AdminOrders />,
-      },
-      {
-        path: "/admin/customers",
-        element: <AdminCustomers />,
-      },
+      { path: "/admin/", element: <Navigate to="/admin/dashboard" replace /> },
+      { path: "/admin/dashboard", element: <DashboardPage /> },
+      { path: "/admin/products", element: <AdminProducts /> },
+      { path: "/admin/collections", element: <AdminCollections /> },
+      { path: "/admin/orders", element: <AdminOrders /> },
+      { path: "/admin/customers", element: <AdminCustomers /> },
     ],
   },
 ]);
