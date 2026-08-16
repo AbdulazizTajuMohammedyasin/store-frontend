@@ -1,20 +1,18 @@
 import { useState } from "react";
+import ProductCard from "@/components/ProductCard";
+import ProductFilterBar from "@/components/ProductFilterBar";
+import Pagination from "@/components/Pagination";
+import RecommendedProducts from "@/components/RecommendedProducts";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useProducts } from "@/hooks/useProducts";
+import { pageContainer, pageSubtitle, pageTitle } from "@/lib/Store";
+import type { ProductParams } from "@/types";
 
-import ProductCard from "../../components/ProductCard";
-import ProductFilterBar from "../../components/ProductFilterBar";
-import Pagination from "../../components/Pagination";
-import RecommendedProducts from "../../components/RecommendedProducts";
-
-import { useProducts } from "../../hooks/useProducts";
-
-import type { ProductParams } from "../../types";
 const PAGE_SIZE = 12;
 
 export const Products = () => {
   const [page, setPage] = useState(1);
-
   const [searchText, setSearchText] = useState("");
-
   const [filters, setFilters] = useState<ProductParams>({});
 
   const { data, isLoading, error } = useProducts({ ...filters, page });
@@ -28,35 +26,39 @@ export const Products = () => {
     ? Math.ceil(data.data.count / PAGE_SIZE)
     : 1;
 
-  if (isLoading) return <p>Loading...</p>;
-
-  if (error) return <p>Error loading products.</p>;
-
   return (
-    <>
-      <div className="container mt-4">
-        <RecommendedProducts />
+    <div className={pageContainer}>
+      <div className="mb-8">
+        <h1 className={pageTitle}>All products</h1>
+        <p className={pageSubtitle}>Browse and filter our full catalog.</p>
+      </div>
 
-        <hr className="my-5" />
+      <RecommendedProducts />
 
-        <ProductFilterBar
-          filters={filters}
-          searchText={searchText}
-          setSearchText={setSearchText}
-          onFilterChange={handleFilterChange}
-        />
+      <ProductFilterBar
+        filters={filters}
+        searchText={searchText}
+        setSearchText={setSearchText}
+        onFilterChange={handleFilterChange}
+      />
 
-        <h2 className="mb-4">All Products</h2>
-
-        <div className="row">
-          {data?.data.results.map((product) => (
-            <div key={product.id} className="col-lg-3 col-md-4 col-sm-6 mb-4">
-              <ProductCard product={product} />
-            </div>
+      {isLoading ? (
+        <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Skeleton key={i} className="aspect-square rounded-xl" />
           ))}
         </div>
-      </div>
-      <div className="d-flex justify-content-center mt-4">
+      ) : error ? (
+        <p className="text-sm text-destructive">Error loading products.</p>
+      ) : (
+        <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
+          {data?.data.results.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      )}
+
+      <div className="mt-8">
         <Pagination
           currentPage={page}
           totalPages={totalPages}
@@ -64,6 +66,6 @@ export const Products = () => {
           isLoading={isLoading}
         />
       </div>
-    </>
+    </div>
   );
 };

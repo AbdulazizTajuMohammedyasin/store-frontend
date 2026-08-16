@@ -1,36 +1,36 @@
 import ProductCard from "./ProductCard";
-
-import { useUserRecommendations } from "../hooks/useRecommendations";
-import type { ProductRecommendation } from "../types/recommendation";
-import { useAuth } from "../context/AuthContext";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useUserRecommendations } from "@/hooks/useRecommendations";
+import { useAuth } from "@/context/AuthContext";
+import { pageTitle } from "@/lib/Store";
 
 export default function RecommendedProducts() {
   const { user } = useAuth();
-
-  if (!user) return null;
   const { data, isLoading, error } = useUserRecommendations();
 
-  if (isLoading) return <p>Loading recommendations...</p>;
-
+  if (!user) return null;
   if (error) return null;
 
   const recommendations = data?.data ?? [];
-
-  if (recommendations.length === 0) return null;
+  if (!isLoading && recommendations.length === 0) return null;
 
   return (
-    <div className="mb-5">
-      <h2 className="mb-4">Recommended For You</h2>
+    <section className="mb-10">
+      <h2 className={pageTitle}>Recommended for you</h2>
 
-      <div className="row">
-        {recommendations
-          .slice(0, 4)
-          .map((recommendation: ProductRecommendation) => (
-            <div key={recommendation.product.id} className="col-md-4 mb-4">
-              <ProductCard product={recommendation.product} />
-            </div>
+      {isLoading ? (
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="aspect-square rounded-xl" />
           ))}
-      </div>
-    </div>
+        </div>
+      ) : (
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
+          {recommendations.slice(0, 4).map((item) => (
+            <ProductCard key={item.product.id} product={item.product} />
+          ))}
+        </div>
+      )}
+    </section>
   );
 }

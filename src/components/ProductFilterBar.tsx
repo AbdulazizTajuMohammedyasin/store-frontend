@@ -1,4 +1,8 @@
-import type { ProductParams } from "../types";
+import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import type { ProductParams } from "@/types";
 
 interface Props {
   filters: ProductParams;
@@ -7,6 +11,14 @@ interface Props {
   onFilterChange: (filters: ProductParams) => void;
 }
 
+const sortOptions = [
+  { label: "Default", value: "" },
+  { label: "Price ↑", value: "price" },
+  { label: "Price ↓", value: "-price" },
+  { label: "A-Z", value: "title" },
+  { label: "Z-A", value: "-title" },
+] as const;
+
 export default function ProductFilterBar({
   filters,
   searchText,
@@ -14,38 +26,31 @@ export default function ProductFilterBar({
   onFilterChange,
 }: Props) {
   return (
-    <div className="card shadow-sm p-3 mb-4">
-      <div className="row g-2 align-items-center">
-        <div className="col-md-5">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Search products..."
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-          />
-        </div>
+    <Card className="mb-6 py-4">
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-12">
+          <div className="relative lg:col-span-5">
+            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search products..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className="pl-9"
+            />
+          </div>
 
-        <div className="col-md-2">
-          <button
-            className="btn btn-dark w-100"
-            onClick={() =>
-              onFilterChange({
-                ...filters,
-                search: searchText,
-              })
-            }
+          <Button
+            className="lg:col-span-2"
+            onClick={() => onFilterChange({ ...filters, search: searchText })}
           >
             Search
-          </button>
-        </div>
+          </Button>
 
-        <div className="col-md-2">
-          <input
+          <Input
             type="number"
-            placeholder="Min Price"
-            className="form-control"
-            value={filters.price_min || ""}
+            placeholder="Min price"
+            className="lg:col-span-2"
+            value={filters.price_min ?? ""}
             onChange={(e) =>
               onFilterChange({
                 ...filters,
@@ -53,14 +58,12 @@ export default function ProductFilterBar({
               })
             }
           />
-        </div>
 
-        <div className="col-md-2">
-          <input
+          <Input
             type="number"
-            placeholder="Max Price"
-            className="form-control"
-            value={filters.price_max || ""}
+            placeholder="Max price"
+            className="lg:col-span-3"
+            value={filters.price_max ?? ""}
             onChange={(e) =>
               onFilterChange({
                 ...filters,
@@ -69,71 +72,26 @@ export default function ProductFilterBar({
             }
           />
         </div>
-      </div>
 
-      <hr />
-
-      <div className="d-flex gap-2 flex-wrap">
-        <button
-          className="btn btn-outline-secondary"
-          onClick={() =>
-            onFilterChange({
-              ...filters,
-              ordering: "",
-            })
-          }
-        >
-          Default
-        </button>
-
-        <button
-          className="btn btn-outline-secondary"
-          onClick={() =>
-            onFilterChange({
-              ...filters,
-              ordering: "price",
-            })
-          }
-        >
-          Price ↑
-        </button>
-
-        <button
-          className="btn btn-outline-secondary"
-          onClick={() =>
-            onFilterChange({
-              ...filters,
-              ordering: "-price",
-            })
-          }
-        >
-          Price ↓
-        </button>
-
-        <button
-          className="btn btn-outline-secondary"
-          onClick={() =>
-            onFilterChange({
-              ...filters,
-              ordering: "title",
-            })
-          }
-        >
-          A-Z
-        </button>
-
-        <button
-          className="btn btn-outline-secondary"
-          onClick={() =>
-            onFilterChange({
-              ...filters,
-              ordering: "-title",
-            })
-          }
-        >
-          Z-A
-        </button>
-      </div>
-    </div>
+        <div className="flex flex-wrap gap-2">
+          {sortOptions.map((option) => (
+            <Button
+              key={option.label}
+              size="sm"
+              variant={
+                (filters.ordering ?? "") === option.value
+                  ? "default"
+                  : "outline"
+              }
+              onClick={() =>
+                onFilterChange({ ...filters, ordering: option.value })
+              }
+            >
+              {option.label}
+            </Button>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

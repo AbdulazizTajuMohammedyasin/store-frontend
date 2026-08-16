@@ -1,3 +1,7 @@
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
@@ -15,7 +19,7 @@ export default function Pagination({
 
   const getPageNumbers = (): (number | "...")[] => {
     const pages: (number | "...")[] = [];
-    const delta = 1; // how many neighbors to show around current page
+    const delta = 1;
 
     for (let i = 1; i <= totalPages; i++) {
       if (
@@ -33,53 +37,50 @@ export default function Pagination({
   };
 
   return (
-    <nav aria-label="Product pagination">
-      <ul className="pagination justify-content-center mb-0">
-        <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-          <button
-            className="page-link"
-            disabled={isLoading || currentPage === 1}
-            onClick={() => onPageChange(currentPage - 1)}
-          >
-            Previous
-          </button>
-        </li>
+    <nav aria-label="Pagination" className="flex justify-center">
+      <div className="flex flex-wrap items-center justify-center gap-1">
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={isLoading || currentPage === 1}
+          onClick={() => onPageChange(currentPage - 1)}
+        >
+          <ChevronLeft className="size-4" />
+          <span className="hidden sm:inline">Previous</span>
+        </Button>
 
-        {getPageNumbers().map((p, idx) =>
-          p === "..." ? (
-            <li key={`ellipsis-${idx}`} className="page-item disabled">
-              <span className="page-link">…</span>
-            </li>
-          ) : (
-            <li
-              key={p}
-              className={`page-item ${p === currentPage ? "active" : ""}`}
+        {getPageNumbers().map((page, idx) =>
+          page === "..." ? (
+            <span
+              key={`ellipsis-${idx}`}
+              className="px-2 text-muted-foreground"
             >
-              <button
-                className="page-link"
-                disabled={isLoading}
-                onClick={() => onPageChange(p)}
-              >
-                {p}
-              </button>
-            </li>
+              …
+            </span>
+          ) : (
+            <Button
+              key={page}
+              size="sm"
+              variant={page === currentPage ? "default" : "outline"}
+              disabled={isLoading}
+              className={cn("min-w-9")}
+              onClick={() => onPageChange(page)}
+            >
+              {page}
+            </Button>
           ),
         )}
 
-        <li
-          className={`page-item ${
-            currentPage === totalPages ? "disabled" : ""
-          }`}
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={isLoading || currentPage === totalPages}
+          onClick={() => onPageChange(currentPage + 1)}
         >
-          <button
-            className="page-link"
-            disabled={isLoading || currentPage === totalPages}
-            onClick={() => onPageChange(currentPage + 1)}
-          >
-            Next
-          </button>
-        </li>
-      </ul>
+          <span className="hidden sm:inline">Next</span>
+          <ChevronRight className="size-4" />
+        </Button>
+      </div>
     </nav>
   );
 }
