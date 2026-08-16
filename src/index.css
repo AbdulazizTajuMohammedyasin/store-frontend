@@ -4,9 +4,6 @@
 @import "@fontsource-variable/geist";
 
 @custom-variant dark (&:is(.dark *));
-body {
-  margin: 20px;
-}
 
 @theme inline {
   --font-heading: var(--font-sans);
@@ -130,4 +127,15 @@ body {
   html {
     @apply font-sans;
   }
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:hover,
+a:visited {
+  color: inherit;
+  text-decoration: none;
 }
