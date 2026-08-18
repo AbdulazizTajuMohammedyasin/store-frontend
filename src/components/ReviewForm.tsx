@@ -1,15 +1,21 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-
-import { useCreateReview, useUpdateReview } from "../hooks/useReviews";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useCreateReview, useUpdateReview } from "@/hooks/useReviews";
 
 interface Props {
   productId: number;
-  review?: {
-    id: number;
-    rating: number;
-    comment: string;
-  };
+  review?: { id: number; rating: number; comment: string };
 }
 
 interface FormData {
@@ -18,7 +24,7 @@ interface FormData {
 }
 
 export default function ReviewForm({ productId, review }: Props) {
-  const { register, handleSubmit, reset } = useForm<FormData>({
+  const { register, handleSubmit, reset, setValue, watch } = useForm<FormData>({
     defaultValues: {
       rating: review?.rating ?? 5,
       comment: review?.comment ?? "",
@@ -27,28 +33,20 @@ export default function ReviewForm({ productId, review }: Props) {
 
   useEffect(() => {
     if (review) {
-      reset({
-        rating: review.rating,
-        comment: review.comment,
-      });
+      reset({ rating: review.rating, comment: review.comment });
     }
   }, [review, reset]);
 
   const createReview = useCreateReview(productId);
-
   const updateReview = useUpdateReview(productId, review?.id ?? 0);
+  const rating = watch("rating");
 
   const onSubmit = (data: FormData) => {
     if (review) {
       updateReview.mutate(data);
     } else {
       createReview.mutate(data, {
-        onSuccess: () => {
-          reset({
-            rating: 5,
-            comment: "",
-          });
-        },
+        onSuccess: () => reset({ rating: 5, comment: "" }),
       });
     }
   };
@@ -56,47 +54,47 @@ export default function ReviewForm({ productId, review }: Props) {
   const isPending = createReview.isPending || updateReview.isPending;
 
   return (
-    <div className="card p-4">
-      <h4>{review ? "Edit Your Review" : "Write a Review"}</h4>
+    <Card>
+      <CardHeader>
+        <CardTitle>{review ? "Edit your review" : "Write a review"}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label>Rating</Label>
+            <Select
+              value={String(rating)}
+              onValueChange={(value) => setValue("rating", Number(value))}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select rating" />
+              </SelectTrigger>
+              <SelectContent>
+                {[5, 4, 3, 2, 1].map((value) => (
+                  <SelectItem key={value} value={String(value)}>
+                    {value} star{value !== 1 ? "s" : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="mb-3">
-          <label>Rating</label>
+          <div className="space-y-2">
+            <Label htmlFor="comment">Comment</Label>
+            <Textarea id="comment" rows={4} {...register("comment")} />
+          </div>
 
-          <select
-            className="form-select"
-            {...register("rating", {
-              valueAsNumber: true,
-            })}
-          >
-            <option value={5}>5 Stars</option>
-            <option value={4}>4 Stars</option>
-            <option value={3}>3 Stars</option>
-            <option value={2}>2 Stars</option>
-            <option value={1}>1 Star</option>
-          </select>
-        </div>
-
-        <div className="mb-3">
-          <label>Comment</label>
-
-          <textarea
-            className="form-control"
-            rows={4}
-            {...register("comment")}
-          />
-        </div>
-
-        <button type="submit" className="btn btn-dark" disabled={isPending}>
-          {review
-            ? isPending
-              ? "Updating..."
-              : "Update Review"
-            : isPending
-              ? "Submitting..."
-              : "Submit Review"}
-        </button>
-      </form>
-    </div>
+          <Button type="submit" disabled={isPending}>
+            {review
+              ? isPending
+                ? "Updating..."
+                : "Update review"
+              : isPending
+                ? "Submitting..."
+                : "Submit review"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
