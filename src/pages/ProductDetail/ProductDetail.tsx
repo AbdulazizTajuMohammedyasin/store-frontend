@@ -25,6 +25,9 @@ export const ProductDetail = () => {
       return () => clearTimeout(timer);
     }
   }, [addToCartMutation.isSuccess]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [id]);
 
   if (isLoading) {
     return (
