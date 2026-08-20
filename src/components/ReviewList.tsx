@@ -1,15 +1,27 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Star } from "lucide-react";
+import { Star, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { neutralLink } from "@/lib/Store";
 import { useReviews } from "@/hooks/useReviews";
+import { useReviewSummary } from "@/hooks/useReviewSummary";
 import { useAuth } from "@/context/AuthContext";
 import ReviewForm from "./ReviewForm";
 
 export default function ReviewList({ productId }: { productId: number }) {
   const { data, isLoading } = useReviews(productId);
   const { user } = useAuth();
+
+  const [wantSummary, setWantSummary] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
+
+  const {
+    data: summaryData,
+    isFetching: summaryLoading,
+    refetch: refetchSummary,
+  } = useReviewSummary(productId, wantSummary);
 
   if (isLoading)
     return <p className="text-sm text-muted-foreground">Loading reviews...</p>;
@@ -19,8 +31,72 @@ export default function ReviewList({ productId }: { productId: number }) {
     (review) => review.reviewed_by === user?.username,
   );
 
+  function handleSummaryClick() {
+    if (!wantSummary) {
+      setWantSummary(true);
+      setShowSummary(true);
+    } else if (summaryData && showSummary) {
+      setShowSummary(false);
+    } else {
+      setShowSummary(true);
+    }
+  }
+
+  const buttonLabel = summaryLoading
+    ? "Summarizing..."
+    : showSummary
+      ? "Hide Summary"
+      : "✨ Reviews Summary";
+
   return (
     <div className="space-y-6">
+      {reviews.length > 0 && (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              className="rounded-full"
+              onClick={handleSummaryClick}
+              disabled={summaryLoading}
+            >
+              {buttonLabel}
+            </Button>
+
+            {showSummary && summaryData && (
+              <Button
+                size="icon"
+                variant="ghost"
+                className="rounded-full size-8"
+                onClick={() => refetchSummary()}
+                disabled={summaryLoading}
+                title="Regenerate summary"
+              >
+                <RotateCw className="size-3.5" />
+              </Button>
+            )}
+          </div>
+
+          {summaryLoading && (
+            <Card>
+              <CardContent className="py-4 space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+                <Skeleton className="h-4 w-2/3" />
+              </CardContent>
+            </Card>
+          )}
+
+          {!summaryLoading && showSummary && summaryData && (
+            <Card>
+              <CardContent className="py-4">
+                <p className="text-sm">{summaryData.data.summary}</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
       {reviews.length === 0 ? (
         <p className="text-sm text-muted-foreground">No reviews yet.</p>
       ) : (
