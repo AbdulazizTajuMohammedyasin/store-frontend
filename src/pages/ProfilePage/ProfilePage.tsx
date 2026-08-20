@@ -1,13 +1,20 @@
 import { useEffect, useState } from "react";
-
-import { useCustomer } from "../../hooks/useCustomer";
+import { Pencil, Save, X } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/context/AuthContext";
+import { useCustomer } from "@/hooks/useCustomer";
 import {
   useAddress,
   useCreateAddress,
   useUpdateAddress,
-} from "../../hooks/useAddress";
-
-import { useAuth } from "../../context/AuthContext";
+} from "@/hooks/useAddress";
+import { pageContainer, pageSubtitle, pageTitle } from "@/lib/Store";
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -65,37 +72,26 @@ export default function ProfilePage() {
 
   if (!customer) {
     return (
-      <div className="container mt-5">
-        <p>Loading profile...</p>
+      <div className={pageContainer}>
+        <Skeleton className="h-40 w-full rounded-xl" />
       </div>
     );
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
-    setFormData((previous) => ({
-      ...previous,
-
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
-    setAddressData((previous) => ({
-      ...previous,
-
-      [name]: value,
-    }));
+    setAddressData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setFormData((previous) => ({
-        ...previous,
-
+    if (e.target.files?.[0]) {
+      setFormData((prev) => ({
+        ...prev,
         profile_image: e.target.files![0],
       }));
     }
@@ -116,18 +112,10 @@ export default function ProfilePage() {
       form.append("profile_image", formData.profile_image);
     }
 
-    // update customer profile
-
     updateCustomer(form);
 
-    // update or create address
-
     if (address) {
-      updateAddress.mutate({
-        id: address.id,
-
-        data: addressData,
-      });
+      updateAddress.mutate({ id: address.id, data: addressData });
     } else {
       createAddress.mutate(addressData);
     }
@@ -136,207 +124,184 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="container mt-5">
-      <div className="card shadow-sm p-4">
-        <div className="text-center">
-          {customer.profile_image ? (
-            <img
-              src={customer.profile_image}
-              alt="Profile"
-              className="rounded-circle mb-3"
-              width="120"
-              height="120"
-            />
-          ) : (
-            <div
-              className="
-                  rounded-circle
-                  bg-secondary
-                  text-white
-                  d-flex
-                  align-items-center
-                  justify-content-center
-                  mx-auto
-                  mb-3
-                "
-              style={{
-                width: "120px",
-
-                height: "120px",
-
-                fontSize: "40px",
-              }}
-            >
-              {customer.first_name.charAt(0)}
-            </div>
-          )}
-
-          {editing ? (
-            <>
-              <input
-                className="form-control mb-2"
-                name="first_name"
-                value={formData.first_name}
-                onChange={handleChange}
-              />
-
-              <input
-                className="form-control mb-2"
-                name="last_name"
-                value={formData.last_name}
-                onChange={handleChange}
-              />
-            </>
-          ) : (
-            <h3>
-              {customer.first_name} {customer.last_name}
-            </h3>
-          )}
-
-          <p className="text-muted">{user?.email}</p>
-        </div>
-
-        <hr />
-
-        <div className="row">
-          <div className="col-md-6 mb-3">
-            <strong>Username</strong>
-
-            <p>{user?.username}</p>
-          </div>
-
-          <div className="col-md-6 mb-3">
-            <strong>Email</strong>
-
-            <p>{user?.email}</p>
-          </div>
-        </div>
-
-        {editing && (
-          <div className="mb-3">
-            <label className="form-label">Profile Image</label>
-
-            <input
-              type="file"
-              className="form-control"
-              accept="image/*"
-              onChange={handleImageChange}
-            />
-          </div>
-        )}
-
-        <div className="row">
-          <div className="col-md-6 mb-3">
-            <strong>Phone</strong>
-
-            {editing ? (
-              <input
-                className="form-control mt-2"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-              />
-            ) : (
-              <p>{customer.phone || "Not provided"}</p>
-            )}
-          </div>
-
-          <div className="col-md-6 mb-3">
-            <strong>Birth Date</strong>
-
-            {editing ? (
-              <input
-                type="date"
-                className="form-control mt-2"
-                name="birth_date"
-                value={formData.birth_date}
-                onChange={handleChange}
-              />
-            ) : (
-              <p>{customer.birth_date || "Not provided"}</p>
-            )}
-          </div>
-
-          <div className="col-md-6 mb-3">
-            <strong>Membership</strong>
-
-            <p>{customer.membership}</p>
-          </div>
-        </div>
-
-        <hr />
-
-        <h5>Address</h5>
-
-        {addressLoading ? (
-          <p>Loading address...</p>
-        ) : editing ? (
-          <>
-            <div className="mb-3">
-              <label className="form-label">Street</label>
-
-              <input
-                className="form-control"
-                name="street"
-                value={addressData.street}
-                onChange={handleAddressChange}
-              />
-            </div>
-
-            <div className="mb-3">
-              <label className="form-label">City</label>
-
-              <input
-                className="form-control"
-                name="city"
-                value={addressData.city}
-                onChange={handleAddressChange}
-              />
-            </div>
-          </>
-        ) : address ? (
-          <>
-            <p>
-              <strong>Street:</strong> {address.street}
-            </p>
-
-            <p>
-              <strong>City:</strong> {address.city}
-            </p>
-          </>
-        ) : (
-          <p>No address added</p>
-        )}
-
-        <div className="d-flex gap-2 mt-3">
-          {editing ? (
-            <>
-              <button
-                className="btn btn-success"
-                onClick={handleSubmit}
-                disabled={
-                  isUpdating ||
-                  updateAddress.isPending ||
-                  createAddress.isPending
-                }
-              >
-                {isUpdating ? "Saving..." : "Save Changes"}
-              </button>
-
-              <button
-                className="btn btn-secondary"
-                onClick={() => setEditing(false)}
-              >
-                Cancel
-              </button>
-            </>
-          ) : (
-            <button className="btn btn-dark" onClick={() => setEditing(true)}>
-              Edit Profile
-            </button>
-          )}
-        </div>
+    <div className={pageContainer}>
+      <div className="mb-8">
+        <h1 className={pageTitle}>Profile</h1>
+        <p className={pageSubtitle}>Manage your account details.</p>
       </div>
+
+      <Card>
+        <CardHeader className="flex flex-col items-center text-center sm:flex-row sm:items-start sm:text-left">
+          <Avatar className="size-24">
+            <AvatarImage src={customer.profile_image || undefined} />
+            <AvatarFallback className="text-2xl">
+              {customer.first_name.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+
+          <div className="mt-4 sm:mt-0 sm:ml-6">
+            {editing ? (
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Input
+                  name="first_name"
+                  value={formData.first_name}
+                  onChange={handleChange}
+                />
+                <Input
+                  name="last_name"
+                  value={formData.last_name}
+                  onChange={handleChange}
+                />
+              </div>
+            ) : (
+              <CardTitle className="text-xl">
+                {customer.first_name} {customer.last_name}
+              </CardTitle>
+            )}
+            <p className="mt-1 text-sm text-muted-foreground">{user?.email}</p>
+          </div>
+        </CardHeader>
+
+        <CardContent className="space-y-6">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label className="text-muted-foreground">Username</Label>
+              <p className="mt-1 font-medium">{user?.username}</p>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Email</Label>
+              <p className="mt-1 font-medium">{user?.email}</p>
+            </div>
+          </div>
+
+          {editing && (
+            <div className="space-y-2">
+              <Label htmlFor="profile_image">Profile image</Label>
+              <Input
+                id="profile_image"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+              />
+            </div>
+          )}
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label>Phone</Label>
+              {editing ? (
+                <Input
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                />
+              ) : (
+                <p>{customer.phone || "Not provided"}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Birth date</Label>
+              {editing ? (
+                <Input
+                  type="date"
+                  name="birth_date"
+                  value={formData.birth_date}
+                  onChange={handleChange}
+                />
+              ) : (
+                <p>{customer.birth_date || "Not provided"}</p>
+              )}
+            </div>
+
+            <div>
+              <Label className="text-muted-foreground">Membership</Label>
+              <p className="mt-1 font-medium">{customer.membership}</p>
+            </div>
+          </div>
+
+          <Separator />
+
+          <div>
+            <h3 className="mb-4 font-semibold">Address</h3>
+
+            {addressLoading ? (
+              <p className="text-sm text-muted-foreground">
+                Loading address...
+              </p>
+            ) : editing ? (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="street">Street</Label>
+                  <Input
+                    id="street"
+                    name="street"
+                    value={addressData.street}
+                    onChange={handleAddressChange}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    name="city"
+                    value={addressData.city}
+                    onChange={handleAddressChange}
+                  />
+                </div>
+              </div>
+            ) : address ? (
+              <div className="space-y-1 text-sm">
+                <p>
+                  <span className="text-muted-foreground">Street: </span>
+                  {address.street}
+                </p>
+                <p>
+                  <span className="text-muted-foreground">City: </span>
+                  {address.city}
+                </p>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No address added.</p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2 sm:flex-row">
+            {editing ? (
+              <>
+                <Button
+                  className="h-11"
+                  onClick={handleSubmit}
+                  disabled={
+                    isUpdating ||
+                    updateAddress.isPending ||
+                    createAddress.isPending
+                  }
+                >
+                  <Save className="size-4" />
+                  {isUpdating ? "Saving..." : "Save changes"}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-11"
+                  onClick={() => setEditing(false)}
+                >
+                  <X className="size-4" />
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              <Button
+                className="h-11 w-full sm:w-auto"
+                onClick={() => setEditing(true)}
+              >
+                <Pencil className="size-4" />
+                Edit profile
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
