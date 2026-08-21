@@ -42,6 +42,14 @@ export const useCreateReview =
             ],
           }
         );
+        queryClient.invalidateQueries(
+          {
+            queryKey: [
+              "review-summary", 
+              productId
+            ],
+          }
+        );
       },
     });
   };
@@ -72,6 +80,14 @@ export const useUpdateReview = (
           productId,
         ],
       });
+      queryClient.invalidateQueries(
+          {
+            queryKey: [
+              "review-summary", 
+              productId
+            ],
+          }
+        );
     },
   });
 };
