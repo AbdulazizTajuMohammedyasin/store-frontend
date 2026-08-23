@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { LogOut, Menu, ShoppingCart, User } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
   Sheet,
   SheetContent,
@@ -160,6 +161,7 @@ export default function Navbar() {
               </Button>
             </div>
           )}
+          <ThemeToggle />
         </nav>
 
         {/* Mobile actions */}

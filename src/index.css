@@ -1,3 +1,6 @@
+@layer bootstrap, theme, base, components, utilities;
+@import "bootstrap/dist/css/bootstrap.min.css" layer(bootstrap);
+
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
