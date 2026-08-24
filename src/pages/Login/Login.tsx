@@ -1,8 +1,12 @@
 import { useForm } from "react-hook-form";
-import { useNavigate, Link } from "react-router-dom";
-
-import { getCurrentUser, loginUser } from "../../api/auth";
-import { useAuth } from "../../context/AuthContext";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { neutralLink, pageContainer } from "@/lib/Store";
+import { getCurrentUser, loginUser } from "@/api/auth";
+import { useAuth } from "@/context/AuthContext";
 
 type LoginData = {
   username: string;
@@ -19,104 +23,95 @@ export default function Login() {
     setError,
     clearErrors,
     formState: { errors, isSubmitting },
-  } = useForm<LoginData>({
-    mode: "onChange",
-  });
+  } = useForm<LoginData>({ mode: "onChange" });
 
   async function onSubmit(data: LoginData) {
     try {
       const response = await loginUser(data);
-
       localStorage.setItem("access", response.data.access);
       localStorage.setItem("refresh", response.data.refresh);
 
       const userResponse = await getCurrentUser();
-
       setUser(userResponse.data);
       navigate("/products");
     } catch (error: any) {
-      const data = error.response?.data;
-
       setError("root", {
         type: "server",
-        message: data?.detail || "Invalid username or password",
+        message: error.response?.data?.detail || "Invalid username or password",
       });
     }
   }
 
   return (
-    <div className="container py-5">
-      <div className="row justify-content-center">
-        <div className="col-lg-5 col-md-7">
-          <div className="card shadow border-0">
-            <div className="card-body p-4">
-              <h2 className="text-center fw-bold mb-4">Login</h2>
-
-              <form onSubmit={handleSubmit(onSubmit)}>
-                {/* Username */}
-                <div className="mb-3">
-                  <label className="form-label">Username</label>
-
-                  <input
-                    type="text"
-                    placeholder="Enter your username"
-                    className={`form-control ${
-                      errors.username ? "is-invalid" : ""
-                    }`}
-                    {...register("username", {
-                      required: "Username is required",
-                      onChange: () => clearErrors("root"),
-                    })}
-                  />
-
-                  <div className="invalid-feedback">
-                    {errors.username?.message}
-                  </div>
-                </div>
-
-                {/* Password */}
-                <div className="mb-4">
-                  <label className="form-label">Password</label>
-
-                  <input
-                    type="password"
-                    placeholder="Enter your password"
-                    className={`form-control ${
-                      errors.password ? "is-invalid" : ""
-                    }`}
-                    {...register("password", {
-                      required: "Password is required",
-                      onChange: () => clearErrors("root"),
-                    })}
-                  />
-
-                  <div className="invalid-feedback">
-                    {errors.password?.message}
-                  </div>
-                </div>
-                {errors.root && (
-                  <div className="alert alert-danger">
-                    {errors.root.message}
-                  </div>
+    <div className={pageContainer}>
+      <div className="mx-auto max-w-md">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-center text-2xl">Login</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="username">Username</Label>
+                <Input
+                  id="username"
+                  placeholder="Enter your username"
+                  {...register("username", {
+                    required: "Username is required",
+                    onChange: () => clearErrors("root"),
+                  })}
+                />
+                {errors.username && (
+                  <p className="text-sm text-destructive">
+                    {errors.username.message}
+                  </p>
                 )}
+              </div>
 
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="btn btn-primary w-100"
-                >
-                  {isSubmitting ? "Logging in..." : "Login"}
-                </button>
-                <p className="text-center mt-3">
-                  Didn't verify your email?{" "}
-                  <Link to="/resend-verification">
-                    Resend verification email
-                  </Link>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  {...register("password", {
+                    required: "Password is required",
+                    onChange: () => clearErrors("root"),
+                  })}
+                />
+                {errors.password && (
+                  <p className="text-sm text-destructive">
+                    {errors.password.message}
+                  </p>
+                )}
+              </div>
+
+              {errors.root && (
+                <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  {errors.root.message}
                 </p>
-              </form>
-            </div>
-          </div>
-        </div>
+              )}
+
+              <Button
+                type="submit"
+                className="h-11 w-full"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Logging in..." : "Login"}
+              </Button>
+
+              <p className="text-center text-sm text-muted-foreground">
+                Didn't verify your email?{" "}
+                <Link
+                  to="/resend-verification"
+                  className="font-medium text-foreground underline-offset-4 hover:underline"
+                >
+                  Resend verification
+                </Link>
+              </p>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
