@@ -23,6 +23,7 @@ import AdminOrders from "./pages/Admin/AdminOrders";
 import AdminCustomers from "./pages/Admin/AdminCustomers";
 import AdminLogin from "./pages/Admin/AdminLogin";
 import AdminRoute from "./pages/Admin/Adminroute";
+import Chatbot from "./components/Chatbot";
 
 export const router = createBrowserRouter([
   {
@@ -83,6 +84,10 @@ export const router = createBrowserRouter([
       {
         path: "/resend-verification",
         element: <ResendVerification />,
+      },
+      {
+        path: "/chat",
+        element: <Chatbot />,
       },
     ],
   },
