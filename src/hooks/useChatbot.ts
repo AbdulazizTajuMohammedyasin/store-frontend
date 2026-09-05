@@ -1,11 +1,24 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import {sendMessage,type ChatRequest,} from "@/api/chatbot";
+import { getChatHistory, sendMessage } from "@/api/chatbot";
+import type { ChatRequest } from "@/types/chatbot";
 
+export const useChatHistory = (enabled: boolean) => {
+  return useQuery({
+    queryKey: ["chat-history"],
+    queryFn: getChatHistory,
+    enabled,
+  });
+};
 
-export const useChatbot = () => {
+export const useSendMessage = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
-    mutationFn: (data: ChatRequest) =>
-      sendMessage(data),
+    mutationFn: (data: ChatRequest) => sendMessage(data),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["chat-history"] });
+    },
   });
 };
