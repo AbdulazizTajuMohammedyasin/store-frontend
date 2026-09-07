@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { MessageCircle, Send, X } from "lucide-react";
+import { Bot, MessageCircle, RotateCcw, Send, User, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +14,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useChatHistory, useStreamMessage } from "@/hooks/useChatbot";
 import { cn } from "@/lib/utils";
 import type { ChatMessage } from "@/types/chatbot";
+import { ChatMessageContent } from "./ChatMessageContent";
 
 let localMessageId = -1;
 
@@ -22,9 +23,11 @@ export default function Chatbot() {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [failedText, setFailedText] = useState<string | null>(null);
 
   const hydrated = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const history = useChatHistory(open && !!user);
   const streamMessage = useStreamMessage();
@@ -37,18 +40,31 @@ export default function Chatbot() {
   }, [history.data]);
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+    scrollRef.current?.scrollTo({
+      top: scrollRef.current.scrollHeight,
+      behavior: "smooth",
+    });
   }, [messages, streamMessage.isPending]);
+
+  useEffect(() => {
+    if (open) inputRef.current?.focus();
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open]);
 
   if (!user) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const text = input.trim();
-    if (!text || streamMessage.isPending) return;
-
-    setInput("");
+  const sendMessageText = async (text: string) => {
+    setFailedText(null);
 
     setMessages((prev) => [
       ...prev,
@@ -85,17 +101,23 @@ export default function Chatbot() {
     try {
       await streamMessage.send({ message: text }, appendToAssistant);
     } catch {
-      setMessages((prev) =>
-        prev.map((message) =>
-          message.id === assistantId
-            ? {
-                ...message,
-                content: "Sorry, something went wrong. Please try again.",
-              }
-            : message,
-        ),
-      );
+      setMessages((prev) => prev.filter((message) => message.id !== assistantId));
+      setFailedText(text);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const text = input.trim();
+    if (!text || streamMessage.isPending) return;
+
+    setInput("");
+    await sendMessageText(text);
+  };
+
+  const handleRetry = () => {
+    if (failedText) sendMessageText(failedText);
   };
 
   return (
@@ -132,26 +154,71 @@ export default function Chatbot() {
                 message.content === "" &&
                 streamMessage.isPending;
 
+              const isUser = message.role === "user";
+
               return (
                 <div
                   key={message.id}
                   className={cn(
-                    "max-w-[85%] rounded-lg px-3 py-2 text-sm",
-                    message.role === "user"
-                      ? "ml-auto bg-primary text-primary-foreground"
-                      : "bg-muted text-foreground",
-                    isStreamingPlaceholder && "text-muted-foreground",
+                    "flex items-end gap-2",
+                    isUser && "flex-row-reverse",
                   )}
                 >
-                  {isStreamingPlaceholder ? "Typing..." : message.content}
+                  <div
+                    className={cn(
+                      "flex size-6 shrink-0 items-center justify-center rounded-full",
+                      isUser
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted-foreground/20 text-foreground",
+                    )}
+                  >
+                    {isUser ? (
+                      <User className="size-3.5" />
+                    ) : (
+                      <Bot className="size-3.5" />
+                    )}
+                  </div>
+
+                  <div
+                    className={cn(
+                      "max-w-[80%] rounded-lg px-3 py-2 text-sm",
+                      isUser
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-foreground",
+                      isStreamingPlaceholder && "text-muted-foreground",
+                    )}
+                  >
+                    {isStreamingPlaceholder ? (
+                      "Typing..."
+                    ) : (
+                      <ChatMessageContent content={message.content} />
+                    )}
+                  </div>
                 </div>
               );
             })}
+
+            {failedText && (
+              <div className="flex items-center justify-between gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                <span>Something went wrong.</span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-7 gap-1"
+                  onClick={handleRetry}
+                >
+                  <RotateCcw className="size-3.5" />
+                  Retry
+                </Button>
+              </div>
+            )}
           </CardContent>
 
           <CardFooter className="border-t p-3">
             <form onSubmit={handleSubmit} className="flex w-full gap-2">
               <Input
+                ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Type a message..."
