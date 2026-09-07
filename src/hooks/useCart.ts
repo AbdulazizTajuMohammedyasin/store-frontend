@@ -6,14 +6,17 @@ import {
     updateCartItem,
     deleteCartItem
 } from "../api/cart";
+import { useAuth } from "../context/AuthContext";
 
 
 
 export const useCart = () => {
+    const { user } = useAuth();
 
     return useQuery({
         queryKey: ["cart"],
-        queryFn: getCart
+        queryFn: getCart,
+        enabled: !!user,
     });
 
 };

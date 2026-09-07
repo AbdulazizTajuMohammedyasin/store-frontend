@@ -4,14 +4,35 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/context/AuthContext";
 import { useCart, useUpdateCartItem, useDeleteCartItem } from "@/hooks/useCart";
 import { pageContainer, pageSubtitle, pageTitle } from "@/lib/Store";
 
 export default function Cart() {
+  const { user } = useAuth();
   const { data, isLoading, error } = useCart();
   const updateMutation = useUpdateCartItem();
   const deleteMutation = useDeleteCartItem();
   const navigate = useNavigate();
+
+  if (!user) {
+    return (
+      <div className={pageContainer}>
+        <Card>
+          <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
+            <ShoppingBag className="size-10 text-muted-foreground" />
+            <div>
+              <h1 className={pageTitle}>Log in to view your cart</h1>
+              <p className={pageSubtitle}>
+                Your cart is saved to your account.
+              </p>
+            </div>
+            <Button onClick={() => navigate("/login")}>Log in</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
