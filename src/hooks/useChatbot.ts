@@ -1,6 +1,7 @@
+import { useCallback, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { getChatHistory, sendMessage } from "@/api/chatbot";
+import { getChatHistory, sendMessage, streamMessage } from "@/api/chatbot";
 import type { ChatRequest } from "@/types/chatbot";
 
 export const useChatHistory = (enabled: boolean) => {
@@ -21,4 +22,25 @@ export const useSendMessage = () => {
       queryClient.invalidateQueries({ queryKey: ["chat-history"] });
     },
   });
+};
+
+export const useStreamMessage = () => {
+  const [isPending, setIsPending] = useState(false);
+  const queryClient = useQueryClient();
+
+  const send = useCallback(
+    async (data: ChatRequest, onChunk: (text: string) => void) => {
+      setIsPending(true);
+
+      try {
+        await streamMessage(data, onChunk);
+        queryClient.invalidateQueries({ queryKey: ["chat-history"] });
+      } finally {
+        setIsPending(false);
+      }
+    },
+    [queryClient],
+  );
+
+  return { send, isPending };
 };

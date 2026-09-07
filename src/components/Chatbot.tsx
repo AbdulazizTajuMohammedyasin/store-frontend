@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
-import { useChatHistory, useSendMessage } from "@/hooks/useChatbot";
+import { useChatHistory, useStreamMessage } from "@/hooks/useChatbot";
 import { cn } from "@/lib/utils";
 import type { ChatMessage } from "@/types/chatbot";
 
@@ -27,7 +27,7 @@ export default function Chatbot() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const history = useChatHistory(open && !!user);
-  const sendMessage = useSendMessage();
+  const streamMessage = useStreamMessage();
 
   useEffect(() => {
     if (history.data && !hydrated.current) {
@@ -38,7 +38,7 @@ export default function Chatbot() {
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
-  }, [messages, sendMessage.isPending]);
+  }, [messages, streamMessage.isPending]);
 
   if (!user) return null;
 
@@ -46,7 +46,7 @@ export default function Chatbot() {
     e.preventDefault();
 
     const text = input.trim();
-    if (!text || sendMessage.isPending) return;
+    if (!text || streamMessage.isPending) return;
 
     setInput("");
 
@@ -60,28 +60,41 @@ export default function Chatbot() {
       },
     ]);
 
-    try {
-      const response = await sendMessage.mutateAsync({ message: text });
+    const assistantId = localMessageId--;
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: localMessageId--,
-          role: "assistant",
-          content: response.message,
-          created_at: new Date().toISOString(),
-        },
-      ]);
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: assistantId,
+        role: "assistant",
+        content: "",
+        created_at: new Date().toISOString(),
+      },
+    ]);
+
+    const appendToAssistant = (chunk: string) => {
+      setMessages((prev) =>
+        prev.map((message) =>
+          message.id === assistantId
+            ? { ...message, content: message.content + chunk }
+            : message,
+        ),
+      );
+    };
+
+    try {
+      await streamMessage.send({ message: text }, appendToAssistant);
     } catch {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: localMessageId--,
-          role: "assistant",
-          content: "Sorry, something went wrong. Please try again.",
-          created_at: new Date().toISOString(),
-        },
-      ]);
+      setMessages((prev) =>
+        prev.map((message) =>
+          message.id === assistantId
+            ? {
+                ...message,
+                content: "Sorry, something went wrong. Please try again.",
+              }
+            : message,
+        ),
+      );
     }
   };
 
@@ -113,25 +126,27 @@ export default function Chatbot() {
               </p>
             )}
 
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={cn(
-                  "max-w-[85%] rounded-lg px-3 py-2 text-sm",
-                  message.role === "user"
-                    ? "ml-auto bg-primary text-primary-foreground"
-                    : "bg-muted text-foreground",
-                )}
-              >
-                {message.content}
-              </div>
-            ))}
+            {messages.map((message) => {
+              const isStreamingPlaceholder =
+                message.role === "assistant" &&
+                message.content === "" &&
+                streamMessage.isPending;
 
-            {sendMessage.isPending && (
-              <div className="max-w-[85%] rounded-lg bg-muted px-3 py-2 text-sm text-muted-foreground">
-                Typing...
-              </div>
-            )}
+              return (
+                <div
+                  key={message.id}
+                  className={cn(
+                    "max-w-[85%] rounded-lg px-3 py-2 text-sm",
+                    message.role === "user"
+                      ? "ml-auto bg-primary text-primary-foreground"
+                      : "bg-muted text-foreground",
+                    isStreamingPlaceholder && "text-muted-foreground",
+                  )}
+                >
+                  {isStreamingPlaceholder ? "Typing..." : message.content}
+                </div>
+              );
+            })}
           </CardContent>
 
           <CardFooter className="border-t p-3">
@@ -140,13 +155,13 @@ export default function Chatbot() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Type a message..."
-                disabled={sendMessage.isPending}
+                disabled={streamMessage.isPending}
               />
 
               <Button
                 type="submit"
                 size="icon"
-                disabled={sendMessage.isPending || !input.trim()}
+                disabled={streamMessage.isPending || !input.trim()}
                 aria-label="Send message"
               >
                 <Send className="size-4" />

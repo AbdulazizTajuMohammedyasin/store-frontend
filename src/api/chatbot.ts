@@ -14,3 +14,37 @@ export const getChatHistory = async (): Promise<ChatMessage[]> => {
 
   return response.data;
 };
+
+export const streamMessage = async (
+  data: ChatRequest,
+  onChunk: (text: string) => void,
+): Promise<void> => {
+  const token = localStorage.getItem("access");
+
+  const response = await fetch(
+    `${import.meta.env.VITE_API_URL}/chat/stream/`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `JWT ${token}` } : {}),
+      },
+      body: JSON.stringify(data),
+    },
+  );
+
+  if (!response.ok || !response.body) {
+    throw new Error(`Chat stream request failed (${response.status})`);
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    const text = decoder.decode(value, { stream: true });
+    if (text) onChunk(text);
+  }
+};
