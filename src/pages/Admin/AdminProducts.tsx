@@ -275,6 +275,7 @@ export default function AdminProducts() {
                       </FieldLabel>
                       <Input
                         {...field}
+                        value={field.value as number | string}
                         id="product-inventory"
                         type="number"
                         aria-invalid={fieldState.invalid}
@@ -294,6 +295,7 @@ export default function AdminProducts() {
                       <FieldLabel htmlFor="product-price">Price</FieldLabel>
                       <Input
                         {...field}
+                        value={field.value as number | string}
                         id="product-price"
                         type="number"
                         step="0.01"

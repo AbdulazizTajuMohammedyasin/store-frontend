@@ -12,8 +12,8 @@ export const updateCustomer = (data: FormData) =>
   });
 
 export const getCustomers = async () => {
-  const response = await client.get<Customer[]>("/customers/");
- 
+  const response = await client.get<CustomerAdmin[]>("/customers/");
+
   return response.data;
 };
 

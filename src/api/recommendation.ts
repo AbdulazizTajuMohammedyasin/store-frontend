@@ -10,5 +10,5 @@ export const getSimilarProducts = (
 };
 
 export const getUserRecommendations = () => {
-  return client.get("/recommendations/");
+  return client.get<ProductRecommendation[]>("/recommendations/");
 };

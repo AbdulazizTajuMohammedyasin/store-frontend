@@ -1,5 +1,5 @@
 import client from "./client";
-import type { Product, ProductParams, PaginatedResponse, UpdateProductData } from "../types";
+import type { Product, ProductDetail, ProductParams, PaginatedResponse, UpdateProductData } from "../types";
 
 
 
@@ -10,7 +10,7 @@ export const getProducts = (params?: ProductParams) => {
 };
 
 export const getProduct = (id: number | string) =>
-    client.get<Product>("/products/"+id+"/");
+    client.get<ProductDetail>("/products/"+id+"/");
 
 export const createProduct = (product: {
   title: string;

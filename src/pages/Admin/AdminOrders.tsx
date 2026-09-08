@@ -118,7 +118,7 @@ export default function AdminOrders() {
 
   // id -> customer lookup, built once whenever the customer list changes.
   const customersById = useMemo(() => {
-    const map = new Map<number, (typeof customers)[number]>();
+    const map = new Map<number, NonNullable<typeof customers>[number]>();
     customers?.forEach((customer) => map.set(customer.id, customer));
     return map;
   }, [customers]);
