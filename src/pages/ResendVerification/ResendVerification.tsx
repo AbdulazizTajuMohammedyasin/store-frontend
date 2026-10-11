@@ -40,11 +40,11 @@ const ResendVerification = () => {
       </p>
 
       <form onSubmit={handleSubmit}>
-        <div className="mt-3 mb-3">
+        <div className="mt-4 mb-4">
           <label htmlFor="email">Email</label>
 
           <input
-            className="ms-2"
+            className="ml-2"
             id="email"
             type="email"
             value={email}
@@ -54,7 +54,7 @@ const ResendVerification = () => {
           />
         </div>
 
-        <button className="btn btn-success" type="submit" disabled={isLoading}>
+        <button className="inline-flex items-center rounded-md bg-[#198754] px-3 py-1.5 font-medium text-white hover:bg-[#157347] disabled:opacity-65" type="submit" disabled={isLoading}>
           {isLoading ? "Sending..." : "Resend verification email"}
         </button>
       </form>

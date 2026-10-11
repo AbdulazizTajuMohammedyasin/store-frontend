@@ -20,7 +20,7 @@ export default function CollectionDetail() {
 
   if (isLoading) {
     return (
-      <div className="container mt-4">
+      <div className="mx-auto mt-6 w-full max-w-7xl px-4">
         <h3>Loading...</h3>
       </div>
     );
@@ -28,7 +28,7 @@ export default function CollectionDetail() {
 
   if (isError) {
     return (
-      <div className="container mt-4">
+      <div className="mx-auto mt-6 w-full max-w-7xl px-4">
         <h3>Something went wrong</h3>
       </div>
     );
@@ -37,12 +37,12 @@ export default function CollectionDetail() {
   const products = data?.data.results ?? [];
 
   return (
-    <div className="container mt-4">
-      <h1 className="mb-4">Collection Products</h1>
+    <div className="mx-auto mt-6 w-full max-w-7xl px-4">
+      <h1 className="mb-6">Collection Products</h1>
 
-      <div className="row">
+      <div className="grid grid-cols-1 gap-x-6 md:grid-cols-3">
         {products.map((product) => (
-          <div className="col-md-4 mb-4" key={product.id}>
+          <div className="mb-6" key={product.id}>
             <ProductCard product={product} />
           </div>
         ))}

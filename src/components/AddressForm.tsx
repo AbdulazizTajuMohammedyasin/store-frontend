@@ -11,13 +11,13 @@ export default function AddressForm({ value, onChange }: Props) {
       onChange({ ...value, [field]: e.target.value });
 
   return (
-    <div className="mb-4">
-      <label className="pmck-label d-block mb-2">Delivery address</label>
+    <div className="mb-6">
+      <label className="pmck-label mb-2 block">Delivery address</label>
 
       <div className="mb-2">
         <input
           type="text"
-          className="form-control pmck-input"
+          className="block w-full bg-white pmck-input"
           placeholder="Street address"
           value={value.street}
           onChange={update("street")}
@@ -27,7 +27,7 @@ export default function AddressForm({ value, onChange }: Props) {
       <div>
         <input
           type="text"
-          className="form-control pmck-input"
+          className="block w-full bg-white pmck-input"
           placeholder="City"
           value={value.city}
           onChange={update("city")}

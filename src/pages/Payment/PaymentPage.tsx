@@ -114,7 +114,7 @@ export default function PaymentPage({
   // Guard against loading/error/empty-cart states before touching cart fields
   if (isLoading) {
     return (
-      <div className="container mt-5">
+      <div className="mx-auto mt-12 w-full max-w-7xl px-4">
         <p>Loading...</p>
       </div>
     );
@@ -122,7 +122,7 @@ export default function PaymentPage({
 
   if (error) {
     return (
-      <div className="container mt-5">
+      <div className="mx-auto mt-12 w-full max-w-7xl px-4">
         <p>Something went wrong loading your cart.</p>
       </div>
     );
@@ -130,7 +130,7 @@ export default function PaymentPage({
 
   if (!cart || cart.cartitem_set.length === 0) {
     return (
-      <div className="container mt-5">
+      <div className="mx-auto mt-12 w-full max-w-7xl px-4">
         <h3>No items available for payment.</h3>
       </div>
     );
@@ -169,9 +169,9 @@ export default function PaymentPage({
 
   if (status === "success") {
     return (
-      <div className="pmck-page d-flex align-items-center justify-content-center">
-        <div className="text-center px-3" style={{ maxWidth: 380 }}>
-          <div className="pmck-success-icon mx-auto mb-4">
+      <div className="pmck-page flex items-center justify-center">
+        <div className="px-4 text-center" style={{ maxWidth: 380 }}>
+          <div className="pmck-success-icon mx-auto mb-6">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
               <path
                 d="M5 13l4 4L19 7"
@@ -182,8 +182,8 @@ export default function PaymentPage({
               />
             </svg>
           </div>
-          <h1 className="h4 fw-semibold mb-2">Payment successful</h1>
-          <p className="text-secondary small mb-0">
+          <h1 className="mb-2 text-2xl font-semibold">Payment successful</h1>
+          <p className="mb-0 text-sm text-[#6c757d]">
             {currency(total)} was charged to your card ending in{" "}
             {digits.slice(-4)}. A receipt has been sent to {email}. Redirecting
             to your order…
@@ -199,13 +199,13 @@ export default function PaymentPage({
         TEST MODE — no real payment will be made
       </div>
 
-      <div className="container-fluid p-0">
-        <div className="row g-0 min-vh-100">
+      <div className="w-full p-0">
+        <div className="grid min-h-screen lg:grid-cols-12">
           {/* ---------------- Left: summary panel ---------------- */}
-          <div className="col-lg-5 pmck-summary d-flex flex-column">
+          <div className="pmck-summary flex flex-col lg:col-span-5">
             <div className="pmck-summary-inner">
               <button
-                className="pmck-back-btn mb-4"
+                className="pmck-back-btn mb-6"
                 onClick={() => (onBack ? onBack() : navigate("/cart"))}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -221,13 +221,13 @@ export default function PaymentPage({
               </button>
 
               <p className="pmck-merchant mb-1">{merchantName}</p>
-              <p className="pmck-amount mb-4">{currency(total)}</p>
+              <p className="pmck-amount mb-6">{currency(total)}</p>
 
-              <ul className="list-unstyled pmck-item-list mb-4">
+              <ul className="pmck-item-list mb-6 list-none p-0">
                 {cart.cartitem_set.map((item) => (
                   <li
                     key={item.id}
-                    className="d-flex justify-content-between py-2"
+                    className="flex justify-between py-2"
                   >
                     <div>
                       <div className="pmck-item-title">
@@ -242,24 +242,24 @@ export default function PaymentPage({
                 ))}
               </ul>
 
-              <div className="pmck-divider mb-3" />
+              <div className="pmck-divider mb-4" />
 
-              <div className="d-flex justify-content-between pmck-line">
+              <div className="pmck-line flex justify-between">
                 <span>Subtotal</span>
                 <span>{currency(subtotal)}</span>
               </div>
-              <div className="d-flex justify-content-between pmck-line">
+              <div className="pmck-line flex justify-between">
                 <span>Shipping</span>
                 <span>{currency(shipping)}</span>
               </div>
-              <div className="d-flex justify-content-between pmck-line mb-3">
+              <div className="pmck-line mb-4 flex justify-between">
                 <span>Tax</span>
                 <span>{currency(tax)}</span>
               </div>
 
-              <div className="pmck-divider mb-3" />
+              <div className="pmck-divider mb-4" />
 
-              <div className="d-flex justify-content-between pmck-total">
+              <div className="pmck-total flex justify-between">
                 <span>Total due</span>
                 <span>{currency(total)}</span>
               </div>
@@ -267,23 +267,23 @@ export default function PaymentPage({
           </div>
 
           {/* ---------------- Right: form panel ---------------- */}
-          <div className="col-lg-7 pmck-form-panel d-flex align-items-center">
+          <div className="pmck-form-panel flex items-center lg:col-span-7">
             <div className="pmck-form-inner">
               {orderError && (
-                <div className="alert alert-danger py-2 small mb-3">
+                <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-800">
                   {orderError}
                 </div>
               )}
 
               <form onSubmit={handleSubmit} noValidate>
-                <div className="mb-3">
+                <div className="mb-4">
                   <label className="pmck-label" htmlFor="email">
                     Email
                   </label>
                   <input
                     id="email"
                     type="email"
-                    className="form-control pmck-input"
+                    className="block w-full bg-white pmck-input"
                     placeholder="you@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -292,7 +292,7 @@ export default function PaymentPage({
 
                 <AddressForm value={address} onChange={setAddress} />
 
-                <div className="mb-3">
+                <div className="mb-4">
                   <label className="pmck-label" htmlFor="cardNumber">
                     Card information
                   </label>
@@ -303,7 +303,7 @@ export default function PaymentPage({
                         id="cardNumber"
                         type="text"
                         inputMode="numeric"
-                        className="form-control pmck-input pmck-card-number"
+                        className="block w-full bg-white pmck-input pmck-card-number"
                         placeholder="1234 1234 1234 1234"
                         value={cardNumber}
                         onChange={(e) =>
@@ -316,7 +316,7 @@ export default function PaymentPage({
                       <input
                         type="text"
                         inputMode="numeric"
-                        className="form-control pmck-input pmck-card-split"
+                        className="block w-full bg-white pmck-input pmck-card-split"
                         placeholder="MM / YY"
                         value={expiry}
                         onChange={(e) =>
@@ -326,7 +326,7 @@ export default function PaymentPage({
                       <input
                         type="text"
                         inputMode="numeric"
-                        className="form-control pmck-input pmck-card-split pmck-card-split-border"
+                        className="block w-full bg-white pmck-input pmck-card-split pmck-card-split-border"
                         placeholder="CVC"
                         value={cvv}
                         onChange={(e) =>
@@ -337,27 +337,27 @@ export default function PaymentPage({
                   </div>
                 </div>
 
-                <div className="mb-3">
+                <div className="mb-4">
                   <label className="pmck-label" htmlFor="name">
                     Cardholder name
                   </label>
                   <input
                     id="name"
                     type="text"
-                    className="form-control pmck-input"
+                    className="block w-full bg-white pmck-input"
                     placeholder="Full name on card"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
                 </div>
 
-                <div className="mb-4">
+                <div className="mb-6">
                   <label className="pmck-label" htmlFor="country">
                     Country or region
                   </label>
                   <select
                     id="country"
-                    className="form-select pmck-input"
+                    className="block w-full bg-white pmck-input"
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
                   >
@@ -371,13 +371,13 @@ export default function PaymentPage({
 
                 <button
                   type="submit"
-                  className="btn pmck-pay-btn w-100"
+                  className="pmck-pay-btn inline-flex w-full items-center justify-center"
                   disabled={status === "processing"}
                 >
                   {status === "processing" ? (
                     <>
                       <span
-                        className="spinner-border spinner-border-sm me-2"
+                        className="mr-2 inline-block size-4 animate-spin rounded-full border-2 border-current border-r-transparent"
                         role="status"
                       />
                       Processing…
@@ -387,7 +387,7 @@ export default function PaymentPage({
                   )}
                 </button>
 
-                <p className="pmck-footer-note text-center mt-3 mb-0">
+                <p className="pmck-footer-note mt-4 mb-0 text-center">
                   🔒 Payments on this page are simulated for testing — no real
                   card is charged.
                 </p>

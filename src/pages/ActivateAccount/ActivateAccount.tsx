@@ -38,7 +38,7 @@ const ActivateAccount = () => {
       <div>
         <h1>Account activated successfully!</h1>
 
-        <button className="btn btn-success" onClick={() => navigate("/login")}>
+        <button className="inline-flex items-center rounded-md bg-[#198754] px-3 py-1.5 font-medium text-white hover:bg-[#157347] disabled:opacity-65" onClick={() => navigate("/login")}>
           Go to Login
         </button>
       </div>
@@ -52,14 +52,14 @@ const ActivateAccount = () => {
       <p>This activation link may be invalid or expired.</p>
 
       <button
-        className="btn btn-success"
+        className="inline-flex items-center rounded-md bg-[#198754] px-3 py-1.5 font-medium text-white hover:bg-[#157347] disabled:opacity-65"
         onClick={() => navigate("/resend-verification")}
       >
         Resend verification email
       </button>
 
       <button
-        className="btn btn-success ms-3"
+        className="inline-flex items-center rounded-md bg-[#198754] px-3 py-1.5 font-medium text-white hover:bg-[#157347] disabled:opacity-65 ml-4"
         onClick={() => navigate("/login")}
       >
         Go to Login
