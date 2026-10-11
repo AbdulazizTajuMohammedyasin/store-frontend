@@ -68,7 +68,7 @@ const EMPTY_ADDRESS: Address = {
 // ---------------------------------------------------------------------------
 
 export default function PaymentPage({
-  merchantName = "Dex Shope",
+  merchantName = "DexShop",
   shipping = 8,
   taxRate = 0.08,
   onBack,
