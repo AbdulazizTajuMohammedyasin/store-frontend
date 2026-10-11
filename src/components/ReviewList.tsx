@@ -1,14 +1,32 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Star, RotateCw } from "lucide-react";
+import { Star, RotateCw, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { neutralLink } from "@/lib/Store";
 import { useReviews } from "@/hooks/useReviews";
 import { useReviewSummary } from "@/hooks/useReviewSummary";
 import { useAuth } from "@/context/AuthContext";
 import ReviewForm from "./ReviewForm";
+
+function Stars({ rating }: { rating: number }) {
+  return (
+    <div className="flex items-center gap-0.5 text-foreground">
+      <span className="sr-only">Rated {rating} out of 5</span>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Star
+          key={i}
+          aria-hidden="true"
+          className={
+            i < rating
+              ? "size-3.5 fill-current"
+              : "size-3.5 text-muted-foreground/40"
+          }
+        />
+      ))}
+    </div>
+  );
+}
 
 export default function ReviewList({ productId }: { productId: number }) {
   const { data, isLoading } = useReviews(productId);
@@ -20,6 +38,7 @@ export default function ReviewList({ productId }: { productId: number }) {
   const {
     data: summaryData,
     isFetching: summaryLoading,
+    isError: summaryError,
     refetch: refetchSummary,
   } = useReviewSummary(productId, wantSummary);
 
@@ -45,97 +64,102 @@ export default function ReviewList({ productId }: { productId: number }) {
   const buttonLabel = summaryLoading
     ? "Summarizing..."
     : showSummary
-      ? "Hide Summary"
-      : "✨ Reviews Summary";
+      ? "Hide summary"
+      : "Reviews summary";
 
   return (
-    <div className="space-y-6">
-      {reviews.length > 0 && (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              className="rounded-full"
-              onClick={handleSummaryClick}
-              disabled={summaryLoading}
-            >
-              {buttonLabel}
-            </Button>
-
-            {showSummary && summaryData && (
+    <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-16">
+      <div className="space-y-8">
+        {reviews.length > 0 && (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
               <Button
-                size="icon"
-                variant="ghost"
-                className="rounded-full size-8"
-                onClick={() => refetchSummary()}
+                variant="outline"
+                className="h-11 gap-2 rounded-none px-4"
+                onClick={handleSummaryClick}
                 disabled={summaryLoading}
-                title="Regenerate summary"
               >
-                <RotateCw className="size-3.5" />
+                <Sparkles className="size-4" />
+                {buttonLabel}
               </Button>
-            )}
-          </div>
 
-          {summaryLoading && (
-            <Card>
-              <CardContent className="py-4 space-y-2">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-5/6" />
-                <Skeleton className="h-4 w-2/3" />
-              </CardContent>
-            </Card>
-          )}
+              {showSummary && summaryData && (
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="size-11 rounded-none"
+                  onClick={() => refetchSummary()}
+                  disabled={summaryLoading}
+                  title="Regenerate summary"
+                  aria-label="Regenerate summary"
+                >
+                  <RotateCw className="size-4" />
+                </Button>
+              )}
+            </div>
 
-          {!summaryLoading && showSummary && summaryData && (
-            <Card>
-              <CardContent className="py-4">
-                <p className="text-sm">{summaryData.data.summary}</p>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      )}
-
-      {reviews.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No reviews yet.</p>
-      ) : (
-        reviews.map((review) => (
-          <Card key={review.id}>
-            <CardContent className="py-4">
-              <div className="flex items-center justify-between gap-3">
-                <p className="font-medium">{review.reviewed_by}</p>
-                <div className="flex items-center gap-0.5 text-amber-500">
-                  {Array.from({ length: review.rating }).map((_, i) => (
-                    <Star key={i} className="size-3.5 fill-current" />
-                  ))}
+            <div aria-live="polite">
+              {summaryLoading && (
+                <div className="space-y-2 bg-tile p-5">
+                  <Skeleton className="h-4 w-full rounded-none" />
+                  <Skeleton className="h-4 w-5/6 rounded-none" />
+                  <Skeleton className="h-4 w-2/3 rounded-none" />
                 </div>
-              </div>
-              <p className="mt-2 text-sm">{review.comment}</p>
-              <p className="mt-2 text-xs text-muted-foreground">
-                {new Date(review.created_at).toLocaleString()}
-              </p>
-            </CardContent>
-          </Card>
-        ))
-      )}
+              )}
 
-      {!user && (
-        <Card>
-          <CardContent className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-muted-foreground">
-              Login to leave a review.
-            </p>
-            <Button asChild size="sm">
+              {!summaryLoading && showSummary && summaryError && !summaryData && (
+                <p className="border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+                  Summary isn't available right now.
+                </p>
+              )}
+
+              {!summaryLoading && showSummary && summaryData && (
+                <div className="bg-tile p-5">
+                  <p className="leading-relaxed">{summaryData.data.summary}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {reviews.length === 0 ? (
+          <p className="text-muted-foreground">No reviews yet.</p>
+        ) : (
+          <ul className="divide-y border-y">
+            {reviews.map((review) => (
+              <li key={review.id} className="py-6">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="font-semibold">{review.reviewed_by}</p>
+                  <Stars rating={review.rating} />
+                </div>
+                <p className="mt-2 leading-relaxed">{review.comment}</p>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {new Date(review.created_at).toLocaleString()}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div>
+        {!user && (
+          <div className="flex flex-col gap-4 bg-tile p-6">
+            <p className="text-muted-foreground">Login to leave a review.</p>
+            <Button
+              asChild
+              variant="outline"
+              className="h-11 w-fit rounded-none border-foreground bg-transparent px-6 dark:bg-transparent"
+            >
               <Link to="/login" className={neutralLink}>
                 Login
               </Link>
             </Button>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        )}
 
-      {user && <ReviewForm productId={productId} review={userReview} />}
+        {user && <ReviewForm productId={productId} review={userReview} />}
+      </div>
     </div>
   );
 }

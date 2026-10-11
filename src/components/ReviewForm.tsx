@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -54,47 +53,63 @@ export default function ReviewForm({ productId, review }: Props) {
   const isPending = createReview.isPending || updateReview.isPending;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{review ? "Edit your review" : "Write a review"}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label>Rating</Label>
-            <Select
-              value={String(rating)}
-              onValueChange={(value) => setValue("rating", Number(value))}
+    <section
+      aria-labelledby="review-form-title"
+      className="border p-6"
+    >
+      <h2
+        id="review-form-title"
+        className="font-display text-2xl leading-none font-extrabold uppercase [font-stretch:68%]"
+      >
+        {review ? "Edit your review" : "Write a review"}
+      </h2>
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="review-rating">Rating</Label>
+          <Select
+            value={String(rating)}
+            onValueChange={(value) => setValue("rating", Number(value))}
+          >
+            <SelectTrigger
+              id="review-rating"
+              className="h-11 w-full rounded-none data-[size=default]:h-11"
             >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select rating" />
-              </SelectTrigger>
-              <SelectContent>
-                {[5, 4, 3, 2, 1].map((value) => (
-                  <SelectItem key={value} value={String(value)}>
-                    {value} star{value !== 1 ? "s" : ""}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+              <SelectValue placeholder="Select rating" />
+            </SelectTrigger>
+            <SelectContent>
+              {[5, 4, 3, 2, 1].map((value) => (
+                <SelectItem key={value} value={String(value)}>
+                  {value} star{value !== 1 ? "s" : ""}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="comment">Comment</Label>
-            <Textarea id="comment" rows={4} {...register("comment")} />
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="comment">Comment</Label>
+          <Textarea
+            id="comment"
+            rows={4}
+            className="rounded-none"
+            {...register("comment")}
+          />
+        </div>
 
-          <Button type="submit" disabled={isPending}>
-            {review
-              ? isPending
-                ? "Updating..."
-                : "Update review"
-              : isPending
-                ? "Submitting..."
-                : "Submit review"}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+        <Button
+          type="submit"
+          className="h-11 w-full rounded-none px-6 sm:w-fit"
+          disabled={isPending}
+        >
+          {review
+            ? isPending
+              ? "Updating..."
+              : "Update review"
+            : isPending
+              ? "Submitting..."
+              : "Submit review"}
+        </Button>
+      </form>
+    </section>
   );
 }

@@ -2,8 +2,6 @@ import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { ShoppingCart, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SimilarProducts from "@/components/SimilarProducts";
@@ -11,6 +9,9 @@ import ReviewList from "@/components/ReviewList";
 import { useProduct } from "@/hooks/useProducts";
 import { useAddToCart } from "@/hooks/useCart";
 import { pageContainer } from "@/lib/Store";
+
+const tabTrigger =
+  "h-12 flex-none rounded-none px-0 text-base data-active:bg-transparent dark:data-active:bg-transparent";
 
 export const ProductDetail = () => {
   const { id } = useParams();
@@ -32,13 +33,14 @@ export const ProductDetail = () => {
   if (isLoading) {
     return (
       <div className={pageContainer}>
-        <div className="grid gap-8 lg:grid-cols-2">
-          <Skeleton className="aspect-square rounded-xl" />
-          <div className="space-y-4">
-            <Skeleton className="h-8 w-2/3" />
-            <Skeleton className="h-6 w-1/3" />
-            <Skeleton className="h-24 w-full" />
-            <Skeleton className="h-11 w-40" />
+        <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
+          <Skeleton className="aspect-square rounded-none bg-tile" />
+          <div className="space-y-5">
+            <Skeleton className="h-5 w-32 rounded-none" />
+            <Skeleton className="h-10 w-4/5 rounded-none" />
+            <Skeleton className="h-8 w-28 rounded-none" />
+            <Skeleton className="h-24 w-full rounded-none" />
+            <Skeleton className="h-12 w-48 rounded-none" />
           </div>
         </div>
       </div>
@@ -48,7 +50,12 @@ export const ProductDetail = () => {
   if (error) {
     return (
       <div className={pageContainer}>
-        <p className="text-sm text-destructive">Something went wrong.</p>
+        <p
+          role="alert"
+          className="border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+        >
+          Something went wrong.
+        </p>
       </div>
     );
   }
@@ -58,68 +65,79 @@ export const ProductDetail = () => {
 
   return (
     <div className={pageContainer}>
-      <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
-        <Card className="overflow-hidden py-0">
+      <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
+        <div className="aspect-square overflow-hidden bg-tile">
           <img
             src={image}
             alt={product.title}
-            className="aspect-square w-full object-cover"
+            className="size-full object-cover"
           />
-        </Card>
+        </div>
 
-        <div className="flex flex-col">
-          <Badge variant="secondary" className="mb-3 w-fit">
+        <div className="flex flex-col lg:py-4">
+          <p className="w-fit bg-tile px-2 py-1 text-xs font-medium">
             {product.collection}
-          </Badge>
+          </p>
 
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          <h1 className="mt-4 font-display text-3xl leading-tight font-semibold [font-stretch:112%] sm:text-4xl">
             {product.title}
           </h1>
 
-          <p className="mt-4 text-3xl font-bold">£{product.price}</p>
+          <p className="mt-5 text-3xl font-semibold tabular-nums">
+            £{product.price}
+          </p>
 
-          <p className="mt-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
+          <p className="mt-6 max-w-prose leading-relaxed text-muted-foreground">
             {product.description}
           </p>
 
-          <Button
-            size="lg"
-            className="mt-6 h-11 w-full sm:w-fit"
-            onClick={() =>
-              addToCartMutation.mutate({
-                product_id: product.id,
-                quantity: 1,
-              })
-            }
-            disabled={addToCartMutation.isPending || justAdded}
-          >
-            {justAdded ? (
-              <>
-                <Check className="size-4" />
-                Added to cart
-              </>
-            ) : (
-              <>
-                <ShoppingCart className="size-4" />
-                {addToCartMutation.isPending ? "Adding..." : "Add to cart"}
-              </>
-            )}
-          </Button>
+          <div className="mt-8 border-t pt-8">
+            <Button
+              size="lg"
+              className="h-12 w-full rounded-none bg-signal px-10 text-base text-signal-foreground hover:bg-signal/85 sm:w-fit"
+              onClick={() =>
+                addToCartMutation.mutate({
+                  product_id: product.id,
+                  quantity: 1,
+                })
+              }
+              disabled={addToCartMutation.isPending || justAdded}
+            >
+              {justAdded ? (
+                <>
+                  <Check className="size-4" />
+                  Added to cart
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="size-4" />
+                  {addToCartMutation.isPending ? "Adding..." : "Add to cart"}
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
 
-      <div className="mt-12">
+      <div className="mt-16 sm:mt-20">
         <Tabs defaultValue="reviews">
-          <TabsList>
-            <TabsTrigger value="reviews">Reviews</TabsTrigger>
-            <TabsTrigger value="similar">Similar products</TabsTrigger>
+          <TabsList
+            variant="line"
+            className="w-full justify-start gap-8 border-b group-data-horizontal/tabs:h-12"
+          >
+            <TabsTrigger value="reviews" className={tabTrigger}>
+              Reviews
+            </TabsTrigger>
+            <TabsTrigger value="similar" className={tabTrigger}>
+              Similar products
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="reviews" className="mt-6">
+          <TabsContent value="reviews" className="mt-8">
             <ReviewList productId={product.id} />
           </TabsContent>
 
-          <TabsContent value="similar" className="mt-6">
+          <TabsContent value="similar" className="mt-8">
             <SimilarProducts productId={product.id} />
           </TabsContent>
         </Tabs>
