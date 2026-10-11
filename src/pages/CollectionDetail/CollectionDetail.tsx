@@ -3,6 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 
 import { getProducts } from "../../api/products";
 import ProductCard from "../../components/ProductCard";
+import ProductGridSkeleton from "../../components/ProductGridSkeleton";
+import { Skeleton } from "@/components/ui/skeleton";
+import { displayTitle, pageContainer, productGrid } from "@/lib/Store";
 
 export default function CollectionDetail() {
   const { id } = useParams();
@@ -20,31 +23,42 @@ export default function CollectionDetail() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto mt-6 w-full max-w-7xl px-4">
-        <h3>Loading...</h3>
+      <div className={pageContainer}>
+        <Skeleton className="mb-10 h-14 w-2/3 max-w-md rounded-none" />
+        <ProductGridSkeleton />
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="mx-auto mt-6 w-full max-w-7xl px-4">
-        <h3>Something went wrong</h3>
+      <div className={pageContainer}>
+        <p
+          role="alert"
+          className="border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+        >
+          Something went wrong
+        </p>
       </div>
     );
   }
 
   const products = data?.data.results ?? [];
+  // Every product in this list belongs to the collection, so its name is
+  // already in the response — no extra request needed for the heading.
+  const collectionName = products[0]?.collection || "Collection products";
 
   return (
-    <div className="mx-auto mt-6 w-full max-w-7xl px-4">
-      <h1 className="mb-6">Collection Products</h1>
+    <div className={pageContainer}>
+      <h1 className={`${displayTitle} mb-10`}>{collectionName}</h1>
 
-      <div className="grid grid-cols-1 gap-x-6 md:grid-cols-3">
+      <div className={productGrid}>
         {products.map((product) => (
-          <div className="mb-6" key={product.id}>
-            <ProductCard product={product} />
-          </div>
+          <ProductCard
+            key={product.id}
+            product={product}
+            showCollection={false}
+          />
         ))}
       </div>
     </div>

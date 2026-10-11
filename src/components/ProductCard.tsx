@@ -4,7 +4,14 @@ import { cn } from "@/lib/utils";
 import { neutralLink } from "@/lib/Store";
 import type { Product } from "@/types";
 
-export default function ProductCard({ product }: { product: Product }) {
+export default function ProductCard({
+  product,
+  showCollection = true,
+}: {
+  product: Product;
+  /** Hide the collection chip where the page already names the collection. */
+  showCollection?: boolean;
+}) {
   const image = product.images[0]?.image || "/default.jpg";
 
   return (
@@ -19,7 +26,7 @@ export default function ProductCard({ product }: { product: Product }) {
           loading="lazy"
           className="size-full object-cover"
         />
-        {product.collection && (
+        {showCollection && product.collection && (
           <span className="absolute top-2 left-2 max-w-[calc(100%-1rem)] truncate bg-background px-2 py-1 text-[11px] leading-none font-medium text-foreground">
             {product.collection}
           </span>
