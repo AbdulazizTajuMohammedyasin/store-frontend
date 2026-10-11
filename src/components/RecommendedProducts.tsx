@@ -1,8 +1,8 @@
 import ProductCard from "./ProductCard";
-import { Skeleton } from "@/components/ui/skeleton";
+import ProductGridSkeleton from "./ProductGridSkeleton";
 import { useUserRecommendations } from "@/hooks/useRecommendations";
 import { useAuth } from "@/context/AuthContext";
-import { pageTitle } from "@/lib/Store";
+import { productGrid, sectionTitle } from "@/lib/Store";
 
 export default function RecommendedProducts() {
   const { user } = useAuth();
@@ -15,22 +15,20 @@ export default function RecommendedProducts() {
   if (!isLoading && recommendations.length === 0) return null;
 
   return (
-    <section className="mb-10">
-      <h2 className={pageTitle}>Recommended for you</h2>
+    <section className="mb-14">
+      <h2 className={sectionTitle}>Recommended for you</h2>
 
-      {isLoading ? (
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="aspect-square rounded-xl" />
-          ))}
-        </div>
-      ) : (
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
-          {recommendations.slice(0, 4).map((item) => (
-            <ProductCard key={item.product.id} product={item.product} />
-          ))}
-        </div>
-      )}
+      <div className="mt-6">
+        {isLoading ? (
+          <ProductGridSkeleton count={4} />
+        ) : (
+          <div className={productGrid}>
+            {recommendations.slice(0, 4).map((item) => (
+              <ProductCard key={item.product.id} product={item.product} />
+            ))}
+          </div>
+        )}
+      </div>
     </section>
   );
 }

@@ -1,6 +1,5 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 interface PaginationProps {
   currentPage: number;
@@ -8,6 +7,8 @@ interface PaginationProps {
   onPageChange: (page: number) => void;
   isLoading?: boolean;
 }
+
+const pageButton = "h-11 min-w-11 rounded-none px-3 tabular-nums";
 
 export default function Pagination({
   currentPage,
@@ -38,12 +39,13 @@ export default function Pagination({
 
   return (
     <nav aria-label="Pagination" className="flex justify-center">
-      <div className="flex flex-wrap items-center justify-center gap-1">
+      <div className="flex flex-wrap items-center justify-center gap-1.5">
         <Button
           variant="outline"
-          size="sm"
+          className={pageButton}
           disabled={isLoading || currentPage === 1}
           onClick={() => onPageChange(currentPage - 1)}
+          aria-label="Previous page"
         >
           <ChevronLeft className="size-4" />
           <span className="hidden sm:inline">Previous</span>
@@ -53,17 +55,19 @@ export default function Pagination({
           page === "..." ? (
             <span
               key={`ellipsis-${idx}`}
-              className="px-2 text-muted-foreground"
+              aria-hidden="true"
+              className="px-1 text-muted-foreground"
             >
               …
             </span>
           ) : (
             <Button
               key={page}
-              size="sm"
               variant={page === currentPage ? "default" : "outline"}
               disabled={isLoading}
-              className={cn("min-w-9")}
+              className={pageButton}
+              aria-label={`Page ${page}`}
+              aria-current={page === currentPage ? "page" : undefined}
               onClick={() => onPageChange(page)}
             >
               {page}
@@ -73,9 +77,10 @@ export default function Pagination({
 
         <Button
           variant="outline"
-          size="sm"
+          className={pageButton}
           disabled={isLoading || currentPage === totalPages}
           onClick={() => onPageChange(currentPage + 1)}
+          aria-label="Next page"
         >
           <span className="hidden sm:inline">Next</span>
           <ChevronRight className="size-4" />

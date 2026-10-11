@@ -3,9 +3,14 @@ import ProductCard from "@/components/ProductCard";
 import ProductFilterBar from "@/components/ProductFilterBar";
 import Pagination from "@/components/Pagination";
 import RecommendedProducts from "@/components/RecommendedProducts";
-import { Skeleton } from "@/components/ui/skeleton";
+import ProductGridSkeleton from "@/components/ProductGridSkeleton";
 import { useProducts } from "@/hooks/useProducts";
-import { pageContainer, pageSubtitle, pageTitle } from "@/lib/Store";
+import {
+  displayTitle,
+  pageContainer,
+  pageSubtitle,
+  productGrid,
+} from "@/lib/Store";
 import type { ProductParams } from "@/types";
 
 const PAGE_SIZE = 12;
@@ -28,8 +33,8 @@ export const Products = () => {
 
   return (
     <div className={pageContainer}>
-      <div className="mb-8">
-        <h1 className={pageTitle}>All products</h1>
+      <div className="mb-10">
+        <h1 className={displayTitle}>All products</h1>
         <p className={pageSubtitle}>Browse and filter our full catalog.</p>
       </div>
 
@@ -43,22 +48,23 @@ export const Products = () => {
       />
 
       {isLoading ? (
-        <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <Skeleton key={i} className="aspect-square rounded-xl" />
-          ))}
-        </div>
+        <ProductGridSkeleton />
       ) : error ? (
-        <p className="text-sm text-destructive">Error loading products.</p>
+        <p
+          role="alert"
+          className="border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+        >
+          Error loading products.
+        </p>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
+        <div className={productGrid}>
           {data?.data.results.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
       )}
 
-      <div className="mt-8">
+      <div className="mt-14">
         <Pagination
           currentPage={page}
           totalPages={totalPages}
