@@ -1,3 +1,5 @@
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import type { Address } from "../types/address";
 
 interface Props {
@@ -11,28 +13,38 @@ export default function AddressForm({ value, onChange }: Props) {
       onChange({ ...value, [field]: e.target.value });
 
   return (
-    <div className="mb-6">
-      <label className="pmck-label mb-2 block">Delivery address</label>
+    <fieldset className="space-y-3">
+      <legend className="mb-2 text-sm font-medium">Delivery address</legend>
 
-      <div className="mb-2">
-        <input
+      <div className="space-y-1.5">
+        <Label htmlFor="address-street" className="text-xs text-muted-foreground">
+          Street address
+        </Label>
+        <Input
+          id="address-street"
           type="text"
-          className="block w-full bg-white pmck-input"
+          autoComplete="street-address"
+          className="h-11 rounded-none"
           placeholder="Street address"
           value={value.street}
           onChange={update("street")}
         />
       </div>
 
-      <div>
-        <input
+      <div className="space-y-1.5">
+        <Label htmlFor="address-city" className="text-xs text-muted-foreground">
+          City
+        </Label>
+        <Input
+          id="address-city"
           type="text"
-          className="block w-full bg-white pmck-input"
+          autoComplete="address-level2"
+          className="h-11 rounded-none"
           placeholder="City"
           value={value.city}
           onChange={update("city")}
         />
       </div>
-    </div>
+    </fieldset>
   );
 }
