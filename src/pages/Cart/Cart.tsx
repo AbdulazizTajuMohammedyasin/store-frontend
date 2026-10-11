@@ -1,12 +1,45 @@
 import { useNavigate } from "react-router-dom";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/context/AuthContext";
 import { useCart, useUpdateCartItem, useDeleteCartItem } from "@/hooks/useCart";
-import { pageContainer, pageSubtitle, pageTitle } from "@/lib/Store";
+import {
+  displayTitle,
+  pageContainer,
+  pageSubtitle,
+  sectionTitle,
+} from "@/lib/Store";
+
+const stepButton =
+  "size-11 rounded-none border-border bg-transparent dark:bg-transparent";
+
+function CartMessage({
+  title,
+  subtitle,
+  action,
+  onAction,
+}: {
+  title: string;
+  subtitle: string;
+  action: string;
+  onAction: () => void;
+}) {
+  return (
+    <div className={pageContainer}>
+      <div className="flex flex-col items-center gap-5 bg-tile px-6 py-16 text-center">
+        <ShoppingBag className="size-10 text-muted-foreground" />
+        <div>
+          <h1 className={sectionTitle}>{title}</h1>
+          <p className={pageSubtitle}>{subtitle}</p>
+        </div>
+        <Button className="h-12 rounded-none px-8" onClick={onAction}>
+          {action}
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 export default function Cart() {
   const { user } = useAuth();
@@ -17,28 +50,23 @@ export default function Cart() {
 
   if (!user) {
     return (
-      <div className={pageContainer}>
-        <Card>
-          <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
-            <ShoppingBag className="size-10 text-muted-foreground" />
-            <div>
-              <h1 className={pageTitle}>Log in to view your cart</h1>
-              <p className={pageSubtitle}>
-                Your cart is saved to your account.
-              </p>
-            </div>
-            <Button onClick={() => navigate("/login")}>Log in</Button>
-          </CardContent>
-        </Card>
-      </div>
+      <CartMessage
+        title="Log in to view your cart"
+        subtitle="Your cart is saved to your account."
+        action="Log in"
+        onAction={() => navigate("/login")}
+      />
     );
   }
 
   if (isLoading) {
     return (
       <div className={pageContainer}>
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="mt-6 h-40 w-full rounded-xl" />
+        <Skeleton className="h-14 w-72 rounded-none" />
+        <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_22rem]">
+          <Skeleton className="h-48 rounded-none" />
+          <Skeleton className="h-48 rounded-none bg-tile" />
+        </div>
       </div>
     );
   }
@@ -46,7 +74,12 @@ export default function Cart() {
   if (error) {
     return (
       <div className={pageContainer}>
-        <p className="text-sm text-destructive">Something went wrong.</p>
+        <p
+          role="alert"
+          className="border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+        >
+          Something went wrong.
+        </p>
       </div>
     );
   }
@@ -55,46 +88,45 @@ export default function Cart() {
 
   if (!cart || cart.cartitem_set.length === 0) {
     return (
-      <div className={pageContainer}>
-        <Card>
-          <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
-            <ShoppingBag className="size-10 text-muted-foreground" />
-            <div>
-              <h1 className={pageTitle}>Your cart is empty</h1>
-              <p className={pageSubtitle}>Add products to get started.</p>
-            </div>
-            <Button onClick={() => navigate("/products")}>
-              Browse products
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      <CartMessage
+        title="Your cart is empty"
+        subtitle="Add products to get started."
+        action="Browse products"
+        onAction={() => navigate("/products")}
+      />
     );
   }
 
   return (
     <div className={pageContainer}>
-      <div className="mb-8">
-        <h1 className={pageTitle}>Shopping cart</h1>
+      <div className="mb-10">
+        <h1 className={displayTitle}>Shopping cart</h1>
         <p className={pageSubtitle}>Review items before checkout.</p>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
-        <div className="space-y-4">
+      <div className="grid items-start gap-10 lg:grid-cols-[1fr_22rem] lg:gap-14">
+        <ul className="divide-y border-y">
           {cart.cartitem_set.map((item) => (
-            <Card key={item.id}>
-              <CardContent className="flex flex-col gap-4 py-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="font-medium">{item.product.title}</p>
-                  <p className="text-sm text-muted-foreground">
-                    £{item.product.price} each
-                  </p>
-                </div>
+            <li
+              key={item.id}
+              className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-4 py-6 sm:grid-cols-[1fr_auto_6rem] sm:gap-x-6"
+            >
+              <div className="col-span-2 min-w-0 sm:col-span-1">
+                <p className="font-display text-base leading-snug font-semibold [font-stretch:112%]">
+                  {item.product.title}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground tabular-nums">
+                  £{item.product.price} each
+                </p>
+              </div>
 
-                <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center">
                   <Button
                     variant="outline"
-                    size="icon-sm"
+                    size="icon"
+                    className={stepButton}
+                    aria-label={`Decrease quantity of ${item.product.title}`}
                     onClick={() =>
                       updateMutation.mutate({
                         id: item.id,
@@ -106,13 +138,18 @@ export default function Cart() {
                     <Minus className="size-4" />
                   </Button>
 
-                  <span className="min-w-8 text-center text-sm font-medium">
+                  <span
+                    className="flex h-11 min-w-11 items-center justify-center border-y px-2 text-sm font-medium tabular-nums"
+                    aria-label={`Quantity ${item.quantity}`}
+                  >
                     {item.quantity}
                   </span>
 
                   <Button
                     variant="outline"
-                    size="icon-sm"
+                    size="icon"
+                    className={stepButton}
+                    aria-label={`Increase quantity of ${item.product.title}`}
                     onClick={() =>
                       updateMutation.mutate({
                         id: item.id,
@@ -122,45 +159,47 @@ export default function Cart() {
                   >
                     <Plus className="size-4" />
                   </Button>
-
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    className="ml-auto sm:ml-2"
-                    onClick={() => deleteMutation.mutate(item.id)}
-                  >
-                    <Trash2 className="size-4" />
-                    Remove
-                  </Button>
                 </div>
 
-                <p className="font-semibold sm:text-right">
-                  £{item.total_price}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                <Button
+                  variant="ghost"
+                  className="h-11 gap-1.5 rounded-none px-3 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  onClick={() => deleteMutation.mutate(item.id)}
+                  aria-label={`Remove ${item.product.title}`}
+                >
+                  <Trash2 className="size-4" />
+                  Remove
+                </Button>
+              </div>
 
-        <Card className="h-fit">
-          <CardContent className="space-y-4 py-5">
+              <p className="text-right font-semibold tabular-nums">
+                £{item.total_price}
+              </p>
+            </li>
+          ))}
+        </ul>
+
+        <aside className="space-y-5 bg-tile p-6 lg:sticky lg:top-24">
+          <h2 className="font-display text-2xl leading-none font-extrabold uppercase [font-stretch:68%]">
+            Summary
+          </h2>
+          <dl className="space-y-3 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Subtotal</span>
-              <span className="font-medium">£{cart.total_price}</span>
+              <dt className="text-muted-foreground">Subtotal</dt>
+              <dd className="font-medium tabular-nums">£{cart.total_price}</dd>
             </div>
-            <Separator />
-            <div className="flex items-center justify-between text-lg font-semibold">
-              <span>Total</span>
-              <span>£{cart.total_price}</span>
+            <div className="flex items-center justify-between border-t pt-3 text-lg font-semibold">
+              <dt>Total</dt>
+              <dd className="tabular-nums">£{cart.total_price}</dd>
             </div>
-            <Button
-              className="h-11 w-full"
-              onClick={() => navigate("/payment")}
-            >
-              Proceed to payment
-            </Button>
-          </CardContent>
-        </Card>
+          </dl>
+          <Button
+            className="h-12 w-full rounded-none bg-signal text-base text-signal-foreground hover:bg-signal/85"
+            onClick={() => navigate("/payment")}
+          >
+            Proceed to payment
+          </Button>
+        </aside>
       </div>
     </div>
   );
