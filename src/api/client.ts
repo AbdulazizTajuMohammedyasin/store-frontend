@@ -1,4 +1,5 @@
 import axios from "axios";
+import { endSession } from "@/lib/session";
 
 const client = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -44,6 +45,7 @@ client.interceptors.response.use(
       const refresh = localStorage.getItem("refresh");
 
       if (!refresh) {
+        endSession();
         return Promise.reject(error);
       }
 
@@ -64,8 +66,7 @@ client.interceptors.response.use(
         return client(originalRequest);
 
       } catch (refreshError) {
-        localStorage.removeItem("access");
-        localStorage.removeItem("refresh");
+        endSession();
 
         return Promise.reject(refreshError);
       }

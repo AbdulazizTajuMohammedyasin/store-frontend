@@ -1,4 +1,5 @@
 import axios from "axios";
+import { endSession } from "@/lib/session";
 import client from "./client";
 import type { ChatMessage, ChatRequest, ChatResponse } from "@/types/chatbot";
 
@@ -27,10 +28,13 @@ const postStream = (data: ChatRequest, token: string | null) =>
   });
 
 // fetch bypasses the Axios interceptor in ./client, so refresh an expired
-// access token here the same way: once, and clear the tokens if it fails.
+// access token here the same way: once, and end the session if it fails.
 const refreshAccessToken = async (): Promise<string | null> => {
   const refresh = localStorage.getItem("refresh");
-  if (!refresh) return null;
+  if (!refresh) {
+    endSession();
+    return null;
+  }
 
   try {
     const response = await axios.post(
@@ -41,8 +45,7 @@ const refreshAccessToken = async (): Promise<string | null> => {
     localStorage.setItem("access", response.data.access);
     return response.data.access;
   } catch {
-    localStorage.removeItem("access");
-    localStorage.removeItem("refresh");
+    endSession();
     return null;
   }
 };
