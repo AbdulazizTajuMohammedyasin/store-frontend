@@ -2,19 +2,8 @@ import { Link } from "react-router-dom";
 import { ChevronRight, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { neutralLink } from "@/lib/Store";
+import { ORDER_STATUS_CLASS, ORDER_STATUS_LABEL } from "@/lib/orderStatus";
 import type { Order } from "@/types/order";
-
-const STATUS_LABEL: Record<Order["payment_status"], string> = {
-  P: "Pending",
-  C: "Completed",
-  F: "Failed",
-};
-
-const STATUS_CLASS: Record<Order["payment_status"], string> = {
-  P: "bg-warning/15 text-warning",
-  C: "bg-success/15 text-success",
-  F: "bg-destructive/15 text-destructive",
-};
 
 export default function OrderCard({ order }: { order: Order }) {
   const itemCount = order.items.length;
@@ -30,10 +19,10 @@ export default function OrderCard({ order }: { order: Order }) {
               <span
                 className={cn(
                   "px-2 py-0.5 text-xs font-medium",
-                  STATUS_CLASS[order.payment_status],
+                  ORDER_STATUS_CLASS[order.payment_status],
                 )}
               >
-                {STATUS_LABEL[order.payment_status]}
+                {ORDER_STATUS_LABEL[order.payment_status]}
               </span>
             </div>
             <p className="mt-1 text-sm text-muted-foreground">

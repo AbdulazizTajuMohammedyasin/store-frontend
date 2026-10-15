@@ -3,20 +3,8 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOrder } from "@/hooks/useOrders";
 import { cn } from "@/lib/utils";
-import { pageContainer, pageSubtitle, sectionTitle } from "@/lib/Store";
-import type { Order } from "@/types/order";
-
-const STATUS_LABEL: Record<Order["payment_status"], string> = {
-  P: "Pending",
-  C: "Completed",
-  F: "Failed",
-};
-
-const STATUS_CLASS: Record<Order["payment_status"], string> = {
-  P: "bg-warning/15 text-warning",
-  C: "bg-success/15 text-success",
-  F: "bg-destructive/15 text-destructive",
-};
+import { displayTitle, pageContainer, pageSubtitle } from "@/lib/Store";
+import { ORDER_STATUS_CLASS, ORDER_STATUS_LABEL } from "@/lib/orderStatus";
 
 export default function OrderDetail() {
   const { id } = useParams();
@@ -34,7 +22,9 @@ export default function OrderDetail() {
   if (error) {
     return (
       <div className={pageContainer}>
-        <p className="text-sm text-destructive">Something went wrong.</p>
+        <p role="alert" className="border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          Something went wrong.
+        </p>
       </div>
     );
   }
@@ -48,7 +38,7 @@ export default function OrderDetail() {
   return (
     <div className={pageContainer}>
       <div className="mb-8">
-        <h1 className={sectionTitle}>Order #{order.id}</h1>
+        <h1 className={displayTitle}>Order #{order.id}</h1>
         <p className={pageSubtitle}>Order details and items.</p>
       </div>
 
@@ -59,10 +49,10 @@ export default function OrderDetail() {
           <span
             className={cn(
               "px-2 py-0.5 text-xs font-medium",
-              STATUS_CLASS[order.payment_status],
+              ORDER_STATUS_CLASS[order.payment_status],
             )}
           >
-            {STATUS_LABEL[order.payment_status]}
+            {ORDER_STATUS_LABEL[order.payment_status]}
           </span>
         </div>
         <p className="mt-2 text-sm text-muted-foreground">
@@ -71,7 +61,7 @@ export default function OrderDetail() {
       </div>
 
       {/* Items */}
-      <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+      <h2 className="mb-4 font-display text-xl font-semibold [font-stretch:112%]">
         Items
       </h2>
 

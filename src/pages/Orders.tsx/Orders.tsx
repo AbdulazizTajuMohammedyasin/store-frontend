@@ -1,7 +1,7 @@
 import OrderCard from "@/components/OrderCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOrders } from "@/hooks/useOrders";
-import { pageContainer, pageSubtitle, sectionTitle } from "@/lib/Store";
+import { displayTitle, pageContainer, pageSubtitle } from "@/lib/Store";
 
 export default function Orders() {
   const { data, isLoading, error } = useOrders();
@@ -10,7 +10,7 @@ export default function Orders() {
   return (
     <div className={pageContainer}>
       <div className="mb-8">
-        <h1 className={sectionTitle}>My orders</h1>
+        <h1 className={displayTitle}>My orders</h1>
         <p className={pageSubtitle}>Track your past purchases.</p>
       </div>
 
@@ -21,7 +21,9 @@ export default function Orders() {
           ))}
         </div>
       ) : error ? (
-        <p className="text-sm text-destructive">Error loading orders.</p>
+        <p role="alert" className="border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          Error loading orders.
+        </p>
       ) : orders.length === 0 ? (
         <div className="border border-border px-5 py-10 text-center text-muted-foreground">
           No orders yet.
