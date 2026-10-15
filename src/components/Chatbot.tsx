@@ -1,14 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Bot, MessageCircle, RotateCcw, Send, User, X } from "lucide-react";
+import { MessageCircle, RotateCcw, Send, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
 import { useChatHistory, useStreamMessage } from "@/hooks/useChatbot";
@@ -121,28 +114,37 @@ export default function Chatbot() {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
+    <div className="fixed right-4 bottom-4 z-50 flex flex-col items-end gap-3">
       {open && (
-        <Card className="flex h-[28rem] w-80 flex-col p-0 shadow-lg sm:w-96">
-          <CardHeader className="flex flex-row items-center justify-between border-b py-3">
-            <CardTitle>Shopping Assistant</CardTitle>
+        <section
+          id="chat-panel"
+          aria-label="Shopping assistant"
+          className="flex h-[min(32rem,calc(100dvh-7rem))] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-lg border border-border bg-background shadow-xl sm:w-96"
+        >
+          <div className="flex items-center justify-between gap-2 border-b border-border py-1 pr-1 pl-4">
+            <h2 className="font-display text-base font-semibold [font-stretch:112%]">
+              Shopping assistant
+            </h2>
 
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="icon"
+              className="size-11 rounded-none"
               onClick={() => setOpen(false)}
               aria-label="Close chat"
             >
-              <X className="size-4" />
+              <X className="size-5" />
             </Button>
-          </CardHeader>
+          </div>
 
-          <CardContent
+          <div
             ref={scrollRef}
-            className="flex-1 space-y-3 overflow-y-auto py-3"
+            role="log"
+            aria-live="polite"
+            className="flex-1 space-y-3 overflow-y-auto px-4 py-4"
           >
             {messages.length === 0 && (
-              <p className="text-sm text-muted-foreground">
+              <p className="max-w-[30ch] text-sm text-muted-foreground">
                 Ask me about products, orders, or anything else about the
                 store.
               </p>
@@ -159,35 +161,20 @@ export default function Chatbot() {
               return (
                 <div
                   key={message.id}
-                  className={cn(
-                    "flex items-end gap-2",
-                    isUser && "flex-row-reverse",
-                  )}
+                  className={cn("flex", isUser && "justify-end")}
                 >
                   <div
                     className={cn(
-                      "flex size-6 shrink-0 items-center justify-center rounded-full",
+                      "max-w-[85%] px-3 py-2 text-sm leading-relaxed",
                       isUser
                         ? "bg-primary text-primary-foreground"
-                        : "bg-muted-foreground/20 text-foreground",
-                    )}
-                  >
-                    {isUser ? (
-                      <User className="size-3.5" />
-                    ) : (
-                      <Bot className="size-3.5" />
-                    )}
-                  </div>
-
-                  <div
-                    className={cn(
-                      "max-w-[80%] rounded-lg px-3 py-2 text-sm",
-                      isUser
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-foreground",
+                        : "bg-tile text-foreground",
                       isStreamingPlaceholder && "text-muted-foreground",
                     )}
                   >
+                    <span className="sr-only">
+                      {isUser ? "You:" : "Assistant:"}
+                    </span>
                     {isStreamingPlaceholder ? (
                       "Typing..."
                     ) : (
@@ -199,52 +186,64 @@ export default function Chatbot() {
             })}
 
             {failedText && (
-              <div className="flex items-center justify-between gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              <div
+                role="alert"
+                className="flex items-center justify-between gap-3 border border-destructive/30 bg-destructive/5 py-1 pr-1 pl-3 text-sm text-destructive"
+              >
                 <span>Something went wrong.</span>
                 <Button
                   type="button"
                   variant="outline"
-                  size="sm"
-                  className="h-7 gap-1"
+                  className="h-11 gap-1.5 rounded-none bg-background px-3 text-foreground"
                   onClick={handleRetry}
                 >
-                  <RotateCcw className="size-3.5" />
+                  <RotateCcw className="size-4" />
                   Retry
                 </Button>
               </div>
             )}
-          </CardContent>
+          </div>
 
-          <CardFooter className="border-t p-3">
-            <form onSubmit={handleSubmit} className="flex w-full gap-2">
-              <Input
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Type a message..."
-                disabled={streamMessage.isPending}
-              />
+          <form
+            onSubmit={handleSubmit}
+            className="flex gap-2 border-t border-border p-3"
+          >
+            <label htmlFor="chat-message" className="sr-only">
+              Message
+            </label>
+            <Input
+              id="chat-message"
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Type a message..."
+              autoComplete="off"
+              className="h-11 rounded-none"
+              disabled={streamMessage.isPending}
+            />
 
-              <Button
-                type="submit"
-                size="icon"
-                disabled={streamMessage.isPending || !input.trim()}
-                aria-label="Send message"
-              >
-                <Send className="size-4" />
-              </Button>
-            </form>
-          </CardFooter>
-        </Card>
+            <Button
+              type="submit"
+              size="icon"
+              className="size-11 shrink-0 rounded-none"
+              disabled={streamMessage.isPending || !input.trim()}
+              aria-label="Send message"
+            >
+              <Send className="size-4" />
+            </Button>
+          </form>
+        </section>
       )}
 
       <Button
         size="icon-lg"
-        className="size-12 rounded-full shadow-lg"
+        className="size-12 rounded-none shadow-lg"
         onClick={() => setOpen((prev) => !prev)}
         aria-label={open ? "Close chat" : "Open chat"}
+        aria-expanded={open}
+        aria-controls={open ? "chat-panel" : undefined}
       >
-        <MessageCircle className="size-5" />
+        {open ? <X className="size-5" /> : <MessageCircle className="size-5" />}
       </Button>
     </div>
   );
