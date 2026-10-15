@@ -1,4 +1,8 @@
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { displayTitle, pageContainer } from "@/lib/Store";
 import { resendActivationEmail } from "../../api/auth";
 
 const ResendVerification = () => {
@@ -31,36 +35,55 @@ const ResendVerification = () => {
   };
 
   return (
-    <div>
-      <h1>Verify your email</h1>
+    <div className={pageContainer}>
+      <div className="mx-auto max-w-md py-4 sm:py-8">
+        <h1 className={displayTitle}>Verify your email</h1>
 
-      <p>
-        Didn't receive your verification email? Enter your email address below
-        and we'll send you a new one.
-      </p>
+        <p className="mt-3 text-muted-foreground">
+          Didn't receive your verification email? Enter your email address below
+          and we'll send you a new one.
+        </p>
 
-      <form onSubmit={handleSubmit}>
-        <div className="mt-4 mb-4">
-          <label htmlFor="email">Email</label>
+        <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
 
-          <input
-            className="ml-2"
-            id="email"
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="Enter your email"
-            required
-          />
+            <Input
+              className="h-11 rounded-none"
+              id="email"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="Enter your email"
+              required
+            />
+          </div>
+
+          <Button
+            className="h-12 w-full rounded-none bg-signal text-base text-signal-foreground hover:bg-signal/85"
+            type="submit"
+            disabled={isLoading}
+          >
+            {isLoading ? "Sending..." : "Resend verification email"}
+          </Button>
+        </form>
+
+        <div className="mt-6" aria-live="polite">
+          {message && (
+            <p className="border border-success/30 bg-success/5 px-4 py-3 text-sm text-success">
+              {message}
+            </p>
+          )}
+          {error && (
+            <p
+              role="alert"
+              className="border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+            >
+              {error}
+            </p>
+          )}
         </div>
-
-        <button className="inline-flex items-center rounded-md bg-[#198754] px-3 py-1.5 font-medium text-white hover:bg-[#157347] disabled:opacity-65" type="submit" disabled={isLoading}>
-          {isLoading ? "Sending..." : "Resend verification email"}
-        </button>
-      </form>
-      <div className="mt-2">
-        {message && <p>{message}</p>}
-        {error && <p>{error}</p>}
       </div>
     </div>
   );

@@ -2,12 +2,14 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { pageContainer, pageSubtitle } from "@/lib/Store";
+import { displayTitle, pageContainer } from "@/lib/Store";
 import { registerUser } from "@/api/auth";
 import type { RegisterData } from "@/types/auth";
+
+const field = "h-11 rounded-none";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -32,7 +34,7 @@ export default function Register() {
   async function onSubmit(data: RegisterData) {
     try {
       await registerUser(data);
-      alert(
+      toast.success(
         "Account created successfully! Please check your email to verify your account.",
       );
       navigate("/login");
@@ -60,7 +62,7 @@ export default function Register() {
       }
 
       if (!handled) {
-        alert(
+        toast.error(
           responseData?.detail ||
             "Something went wrong while creating your account. Please try again.",
         );
@@ -70,109 +72,118 @@ export default function Register() {
 
   return (
     <div className={pageContainer}>
-      <div className="mx-auto max-w-md">
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Create account</CardTitle>
-            <p className={pageSubtitle}>Register to start shopping.</p>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder="Enter your email"
-                  {...register("email", {
-                    required: "Email is required",
-                    pattern: {
-                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                      message: "Please enter a valid email",
-                    },
-                  })}
-                />
-                {errors.email && (
-                  <p className="text-sm text-destructive">
-                    {errors.email.message}
-                  </p>
-                )}
-              </div>
+      <div className="mx-auto max-w-md py-4 sm:py-8">
+        <h1 className={displayTitle}>Create account</h1>
+        <p className="mt-3 text-muted-foreground">Register to start shopping.</p>
 
-              <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  autoComplete="username"
-                  placeholder="Choose a username"
-                  {...register("username", {
-                    required: "Username is required",
-                    minLength: {
-                      value: 3,
-                      message: "Username must be at least 3 characters",
-                    },
-                  })}
-                />
-                {errors.username && (
-                  <p className="text-sm text-destructive">
-                    {errors.username.message}
-                  </p>
-                )}
-              </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              autoComplete="email"
+              className={field}
+              placeholder="Enter your email"
+              aria-invalid={errors.email ? true : undefined}
+              aria-describedby={errors.email ? "email-error" : undefined}
+              {...register("email", {
+                required: "Email is required",
+                pattern: {
+                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  message: "Please enter a valid email",
+                },
+              })}
+            />
+            {errors.email && (
+              <p id="email-error" className="text-sm text-destructive">
+                {errors.email.message}
+              </p>
+            )}
+          </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  autoComplete="new-password"
-                  placeholder="Enter your password"
-                  {...register("password", {
-                    required: "Password is required",
-                    minLength: {
-                      value: 8,
-                      message: "Password must be at least 8 characters",
-                    },
-                  })}
-                />
-                {errors.password && (
-                  <p className="text-sm text-destructive">
-                    {errors.password.message}
-                  </p>
-                )}
-              </div>
+          <div className="space-y-2">
+            <Label htmlFor="username">Username</Label>
+            <Input
+              id="username"
+              autoComplete="username"
+              className={field}
+              placeholder="Choose a username"
+              aria-invalid={errors.username ? true : undefined}
+              aria-describedby={errors.username ? "username-error" : undefined}
+              {...register("username", {
+                required: "Username is required",
+                minLength: {
+                  value: 3,
+                  message: "Username must be at least 3 characters",
+                },
+              })}
+            />
+            {errors.username && (
+              <p id="username-error" className="text-sm text-destructive">
+                {errors.username.message}
+              </p>
+            )}
+          </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="re_password">Confirm password</Label>
-                <Input
-                  id="re_password"
-                  type="password"
-                  autoComplete="new-password"
-                  placeholder="Confirm your password"
-                  {...register("re_password", {
-                    required: "Please confirm your password",
-                    validate: (value) =>
-                      value === password || "Passwords do not match",
-                  })}
-                />
-                {errors.re_password && (
-                  <p className="text-sm text-destructive">
-                    {errors.re_password.message}
-                  </p>
-                )}
-              </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              autoComplete="new-password"
+              className={field}
+              placeholder="Enter your password"
+              aria-invalid={errors.password ? true : undefined}
+              aria-describedby={errors.password ? "password-error" : undefined}
+              {...register("password", {
+                required: "Password is required",
+                minLength: {
+                  value: 8,
+                  message: "Password must be at least 8 characters",
+                },
+              })}
+            />
+            {errors.password && (
+              <p id="password-error" className="text-sm text-destructive">
+                {errors.password.message}
+              </p>
+            )}
+          </div>
 
-              <Button
-                type="submit"
-                className="h-11 w-full"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Creating account..." : "Register"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+          <div className="space-y-2">
+            <Label htmlFor="re_password">Confirm password</Label>
+            <Input
+              id="re_password"
+              type="password"
+              autoComplete="new-password"
+              className={field}
+              placeholder="Confirm your password"
+              aria-invalid={errors.re_password ? true : undefined}
+              aria-describedby={
+                errors.re_password ? "re_password-error" : undefined
+              }
+              {...register("re_password", {
+                required: "Please confirm your password",
+                validate: (value) =>
+                  value === password || "Passwords do not match",
+              })}
+            />
+            {errors.re_password && (
+              <p id="re_password-error" className="text-sm text-destructive">
+                {errors.re_password.message}
+              </p>
+            )}
+          </div>
+
+          <Button
+            type="submit"
+            className="h-12 w-full rounded-none bg-signal text-base text-signal-foreground hover:bg-signal/85"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Creating account..." : "Register"}
+          </Button>
+        </form>
       </div>
     </div>
   );
