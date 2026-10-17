@@ -22,11 +22,27 @@ Captured from the deployed site while logged in as a demo customer.
 |---|---|
 | ![Collections grid](docs/screenshots/collections.png) | ![Cart with quantity steppers and order summary](docs/screenshots/cart.png) |
 
+### Reviews and recommendations
+
+| AI review summary | Similar products |
+|---|---|
+| ![Reviews tab with the AI-generated review summary, review list and review form](docs/screenshots/reviews-summary.png) | ![Similar products tab on a product page](docs/screenshots/similar-products.png) |
+
+### AI shopping assistant
+
+| Desktop | Mobile |
+|---|---|
+| ![Shopping assistant chat panel answering a question about the cart](docs/screenshots/chatbot.png) | ![Shopping assistant chat panel on mobile](docs/screenshots/mobile-chatbot.png) |
+
 ### Account
 
-| Login | Order detail |
+| Login | Profile |
 |---|---|
-| ![Login page](docs/screenshots/login.png) | ![Order detail with status and items](docs/screenshots/order-detail.png) |
+| ![Login page](docs/screenshots/login.png) | ![Profile page with account details and address](docs/screenshots/profile.png) |
+
+| Order detail |
+|---|
+| ![Order detail with status and items](docs/screenshots/order-detail.png) |
 
 ### Mobile
 
