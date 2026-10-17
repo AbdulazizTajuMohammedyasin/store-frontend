@@ -1,5 +1,39 @@
 # Store Frontend — E-commerce Storefront
 
+**Live demo:** [store-frontend-flame.vercel.app](https://store-frontend-flame.vercel.app/)
+
+## Screenshots
+
+Captured from the deployed site while logged in as a demo customer.
+
+### Home
+
+| Light | Dark |
+|---|---|
+| ![Home page in light mode](docs/screenshots/home.png) | ![Home page in dark mode](docs/screenshots/home-dark.png) |
+
+### Shopping
+
+| Products | Product detail |
+|---|---|
+| ![Products page with recommendations, search, price filter and sorting](docs/screenshots/products.png) | ![Product detail page with Add to cart, reviews and similar products tabs](docs/screenshots/product-detail.png) |
+
+| Collections | Cart |
+|---|---|
+| ![Collections grid](docs/screenshots/collections.png) | ![Cart with quantity steppers and order summary](docs/screenshots/cart.png) |
+
+### Account
+
+| Login | Order detail |
+|---|---|
+| ![Login page](docs/screenshots/login.png) | ![Order detail with status and items](docs/screenshots/order-detail.png) |
+
+### Mobile
+
+| Home | Product | Cart |
+|---|---|---|
+| ![Home page on mobile](docs/screenshots/mobile-home.png) | ![Product page on mobile](docs/screenshots/mobile-product.png) | ![Cart on mobile](docs/screenshots/mobile-cart.png) |
+
 ## 1. Project Overview
 
 This is a React + TypeScript single-page application implementing an e-commerce storefront ("DexShop" — the brand name used in the UI, e.g. `Navbar.tsx`), plus a staff-only admin back-office, both served from the same app. It communicates with a separate Django REST Framework backend (see the sibling `store` project) over HTTP.
